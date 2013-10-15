@@ -1,11 +1,18 @@
 <div class="notes">
 <?php $tNote= explode("\n",$this->content) ?>
 <?php $bStart=0;?>
+<?php $bArchive=0;?>
 <?php foreach($tNote as $i => $sLine):?>
 
 	<?php $bOk=0?>
+	
+	<?php if(substr($sLine,0,3)=='==='):?>
+		<?php $bArchive=1;?>
+	<?php endif;?>
 
-	<?php if(substr($sLine,0,2)=='=='):?>
+	<?php if($bArchive):?>
+		<p style="color:gray"><?php echo $sLine?></p>
+	<?php elseif(substr($sLine,0,2)=='=='):?>
 		<?php if($bStart):?></p><?php endif;?>
 		<p style="font-weight:bold;border-bottom:1px solid black;margin-top:20px"><?php echo substr($sLine,2)?>
 		<?php $bStart=1;?>
