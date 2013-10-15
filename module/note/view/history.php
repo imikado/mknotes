@@ -124,24 +124,9 @@ ul.tabs a{
 
 <?php if($bStart):?></p><?php endif;?>
 
-
+<p></p>
 </div>
 
 
-<p style="text-align:right"> <a href="<?php echo $this->getLink('note::edit',array('id'=>$this->oNote->id))?>">Editer</a></p>
 
-<form action="" method="POST" id="formChecked">
-<input type="hidden" name="type" value="checked"/>
-<input type="hidden" name="line" value="" id="inputLine"/>
-<input type="hidden" name="checked" value="" id="inputChecked"/>
-</form>
-
-<div class="popup" id="popupUpdateLine">
-<form action="" method="POST" id="formUpdateLine">
-<input type="hidden" name="type" value="updateLine"/>
-<input type="hidden" name="line" value="" id="inputUpdateLine"/>
-<textarea id="inputUpdateContent" name="content" cols="1" style="width:600px"> </textarea>
-<p><input type="submit" value="Save"/></p>
-</form>
-</div>
 
