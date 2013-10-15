@@ -10,7 +10,7 @@
 	<?php foreach($this->tNote as $oNote):?>
 	<tr <?php echo plugin_tpl::alternate(array('','class="alt"'))?>>
 		
-		<td><?php echo $oModelNote->getViewProcessed($oNote->content,0)->show() ?></td>
+		<td><div style="height:150px;overflow:auto"><?php echo $oModelNote->getViewProcessed($oNote->content,0)->show() ?></div></td>
 
 		<td>
 			

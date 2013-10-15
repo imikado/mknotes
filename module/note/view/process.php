@@ -13,8 +13,10 @@
 		<?php if($bStart):?></p><?php endif;?>
 		<p style="<?php
 			if(substr($sLine,0,2)=='--'):
+				$sText=substr($sLine,2);
 				?>border:1px solid gray;margin-left:30px;margin-top:2px;background:#eee<?php
 			elseif(substr($sLine,0,1)=='-'):
+				$sText=substr($sLine,1);
 				?>border:1px solid gray;margin-left:15px;background:#cddde3;margin-top:4px<?php
 			endif;
 			
@@ -39,7 +41,7 @@
 				<?php
 			endif;
 			
-			echo substr($sLine,2);
+			echo $sText;
 			?>
 		<?php $bStart=1;?>
 	<?php else:?>

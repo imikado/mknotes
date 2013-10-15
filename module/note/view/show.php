@@ -19,7 +19,7 @@ function doUndo(i){
 var tContent=new Array();
 <?php $tContent=explode("\n",$this->oNote->content);
 foreach($tContent as $i => $sLine):
-	?>tContent[ <?php echo $i?> ]='<?php echo str_replace("'","\'",$sLine)?>';
+	?>tContent[ <?php echo $i?> ]='<?php echo str_replace("'","\'",html_entity_decode($sLine,ENT_QUOTES,'ISO-8859-1'))?>';
 	<?php 
 endforeach;
 ?>
