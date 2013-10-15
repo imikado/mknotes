@@ -7,7 +7,7 @@
 	<?php $bOk=0?>
 	
 	<?php if(substr($sLine,0,3)=='==='):?>
-		<?php $bArchive=1;?>
+		<?php break;?>
 	<?php endif;?>
 
 	<?php if($bArchive):?>

@@ -50,11 +50,35 @@ function editLine(i){
 	position:absolute;
 	display:none;
 	}
+ul.tabs li{
+display:inline;
+border:1px solid gray;
+padding:0px 6px;
+background:#ddd;
+}
+ul.tabs {
+	border-bottom:1px solid gray;
+}
+ul.tabs li.selected{
+	border-bottom:1px solid white;
+	background:white;
+}
+ul.tabs a{
+	text-decoration:none;
+}
 </style>
+
+<ul class="tabs">
+	<li class="selected"><a href="<?php echo _root::getLink('note::show',array('id'=>$this->oNote->id))?>">Current</a></li>
+	<li><a href="<?php echo _root::getLink('note::history',array('id'=>$this->oNote->id))?>">History</a></li>
+</ul>
 
 <?php echo $this->oViewProcessed->show()?>
 
-<p style="text-align:right"> <a href="<?php echo $this->getLink('note::edit',array('id'=>$this->oNote->id))?>">Editer</a></p>
+<p style="text-align:right"> <a href="<?php echo $this->getLink('note::edit',array('id'=>$this->oNote->id))?>">Editer</a> 
+|
+<a onclick="return confirm('Confirmez-vous vouloir archiver ?');" href="<?php echo $this->getLink('note::archive',array('id'=>$this->oNote->id))?>">Archiver</a> 
+</p>
 
 <form action="" method="POST" id="formChecked">
 <input type="hidden" name="type" value="checked"/>
@@ -70,4 +94,6 @@ function editLine(i){
 <p><input type="submit" value="Save"/></p>
 </form>
 </div>
+
+
 

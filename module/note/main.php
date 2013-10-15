@@ -85,6 +85,40 @@ class module_note extends abstract_module{
 		$this->oLayout->add('main',$oView);
 	}
 	
+	public function _history(){
+		$this->processSaveChecked();
+		$this->processSaveUpdateLine();
+		
+		$oNote=model_note::getInstance()->findById( _root::getParam('id') );
+		
+		$oView=new _view('note::history');
+		$oView->oNote=$oNote;
+		
+		$this->oLayout->add('main',$oView);
+	}
+	
+	public function _archive(){
+		$oNote=model_note::getInstance()->findById( _root::getParam('id') );
+		
+		$sCurrent=null;
+		
+		$tNote= explode("\n",$oNote->content);
+		foreach($tNote as $i => $sLine){
+			$sCurrent.=$sLine."\n";
+			
+			if(substr($sLine,0,3)=='==='){
+				break;
+			}
+		}
+		
+		
+		$oNote->content=implode("\n",$tNote)."\n".'===archive '.date('d/m/Y')."\n".$sCurrent;
+		$oNote->save();
+		
+		_root::redirect('note::show',array('id'=>$oNote->id));
+		
+	}
+	
 	public function _preview(){ 
 		$this->oLayout=new _layout('preview');
 		$sText=_root::getParam('text');
