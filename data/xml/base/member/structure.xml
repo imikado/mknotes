@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <structure>
 <colonne primaire="true">id</colonne>
-<colonne>date</colonne>
-<colonne>content</colonne>
-<colonne>member_id</colonne>
+<colonne>login</colonne>
+<colonne>pass</colonne>
 </structure>

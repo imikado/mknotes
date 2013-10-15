@@ -1,9 +1,9 @@
 <?php
-class model_note extends abstract_model{
+class model_member extends abstract_model{
 	
-	protected $sClassRow='row_note';
+	protected $sClassRow='row_member';
 	
-	protected $sTable='note';
+	protected $sTable='member';
 	protected $sConfig='xmlExple';
 	
 	protected $tId=array('id');
@@ -16,15 +16,36 @@ class model_note extends abstract_model{
 		return $this->findOne('SELECT * FROM '.$this->sTable.' WHERE id=?',$uId );
 	}
 	public function findAll(){
-		return $this->findMany('SELECT * FROM '.$this->sTable.' WHERE member_id=?',_root::getAuth()->getAccount()->id);
+		return $this->findMany('SELECT * FROM '.$this->sTable);
+	}
+	
+	public function getListAccount(){
+  
+       $tAccount=$this->findAll();
+      
+       $tLoginPassAccount=array();
+      
+       if($tAccount){
+       foreach($tAccount as $oAccount){
+       //on cree ici un tableau indexe par nom d'utilisateur et mot de pase
+           $tLoginPassAccount[$oAccount->login][$oAccount->pass]=$oAccount;
+       }
+       }
+
+       return $tLoginPassAccount;
+
+   }
+	public function hashPassword($sPassword){
+		//utiliser ici la methode de votre choix pour hasher votre mot de passe
+		return sha1('A2fereAF45Dds456'.$sPassword);
 	}
 	
 	
 }
 
-class row_note extends abstract_row{
+class row_member extends abstract_row{
 	
-	protected $sClassModel='model_note';
+	protected $sClassModel='model_member';
 	
 	/*exemple jointure 
 	public function findAuteur(){
@@ -61,7 +82,6 @@ class row_note extends abstract_row{
 		if(!$this->isValid()){
 			return false;
 		}
-		$this->member_id=_root::getAuth()->getAccount()->id;
 		parent::save();
 		return true;
 	}

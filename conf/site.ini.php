@@ -22,7 +22,7 @@ session.cookie_secure=0
 session.cookie_domain=
 session.cookie_path=
 session.cookie_lifetime=
-enabled=0
+enabled=1
 class=plugin_auth
 module=auth::login
 ;timeout d'inactivite (entre 2 pages), temps en secondes

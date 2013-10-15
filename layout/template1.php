@@ -10,7 +10,9 @@
 <body>
 
 <div class="main">
-	<p><a href="<?php echo _root::getLink('note::index')?>">Liste notes</a></p>
+	<p><a href="<?php echo _root::getLink('note::index')?>">Liste notes</a> | 
+	<a href="<?php echo _root::getLink('auth::logout')?>">Logout</a>
+	</p>
 	<div class="content">
 		<?php echo $this->load('main') ?>
 	</div>
