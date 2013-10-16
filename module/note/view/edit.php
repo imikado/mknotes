@@ -19,7 +19,7 @@ function preview(){
 <tr>
 	<td><?php $oPluginHtml=new plugin_html?>
 <form action="" method="POST" >
-<textarea onKeyUp="preview()" id="contentfrom" style="width:550px;height:600px" name="content" ><?php echo $this->oNote->content ?></textarea>
+<textarea onKeyUp="preview()" id="contentfrom" style="width:550px;height:600px" name="content" ><?php echo $this->content ?></textarea>
 	
 
 <input type="hidden" name="token" value="<?php echo $this->token?>" />

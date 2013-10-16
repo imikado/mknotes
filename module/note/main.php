@@ -58,8 +58,19 @@ class module_note extends abstract_module{
 		
 		$oNote=model_note::getInstance()->findById( _root::getParam('id') );
 		
+		$sContent=null;
+		$tContent=explode("\n",$oNote->content);
+		foreach($tContent as $sLine){
+			if(substr($sLine,0,3)=='==='){
+				break;
+			}
+			
+			$sContent.=$sLine."\n";
+		}
+		
 		$oView=new _view('note::edit');
 		$oView->oNote=$oNote;
+		$oView->content=$sContent;
 		$oView->tId=model_note::getInstance()->getIdTab();
 		
 		
@@ -198,24 +209,23 @@ class module_note extends abstract_module{
 			$oNote=model_note::getInstance()->findById( _root::getParam('id',null) );
 		}
 		
-		$tId=model_note::getInstance()->getIdTab();
-		$tColumn=model_note::getInstance()->getListColumn();
-		foreach($tColumn as $sColumn){
-			 $oPluginUpload=new plugin_upload($sColumn);
-			if($oPluginUpload->isValid()){
-				$sNewFileName=_root::getConfigVar('path.upload').$sColumn.'_'.date('Ymdhis');
-
-				$oPluginUpload->saveAs($sNewFileName);
-				$oNote->$sColumn=$oPluginUpload->getPath();
-				continue;	
-			}else  if( _root::getParam($sColumn,null) === null ){ 
-				continue;
-			}else if( in_array($sColumn,$tId)){
-				 continue;
+		
+		$tArchiveContent=array();
+		$bArchive=0;
+		$tNote= explode("\n",$oNote->content);
+		foreach($tNote as $i => $sLine){
+			if(substr($sLine,0,3)=='==='){
+				$bArchive=1;
 			}
 			
-			$oNote->$sColumn=_root::getParam($sColumn,null) ;
+			if($bArchive){
+				$tArchiveContent[]=$sLine;
+			}
 		}
+		
+		$oNote->content=_root::getParam('content')."\n".implode("\n",$tArchiveContent);
+		
+		
 		
 		if($oNote->save()){
 			//une fois enregistre on redirige (vers la page liste)
