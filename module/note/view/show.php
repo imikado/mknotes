@@ -70,14 +70,14 @@ ul.tabs a{
 
 <ul class="tabs">
 	<li class="selected"><a href="<?php echo _root::getLink('note::show',array('id'=>$this->oNote->id))?>">Current</a></li>
-	<li><a href="<?php echo _root::getLink('note::history',array('id'=>$this->oNote->id))?>">History</a></li>
+	<li><a href="<?php echo _root::getLink('note::history',array('id'=>$this->oNote->id))?>">Snapshots</a></li>
 </ul>
 
 <?php echo $this->oViewProcessed->show()?>
 
 <p style="text-align:right"> <a href="<?php echo $this->getLink('note::edit',array('id'=>$this->oNote->id))?>">Editer</a> 
 |
-<a onclick="return confirm('Confirmez-vous vouloir archiver ?');" href="<?php echo $this->getLink('note::archive',array('id'=>$this->oNote->id))?>">Archiver</a> 
+<a onclick="return confirm('Confirmez-vous vouloir archiver ?');" href="<?php echo $this->getLink('note::archive',array('id'=>$this->oNote->id))?>">Take a Snapshot</a> 
 </p>
 
 <form action="" method="POST" id="formChecked">
@@ -94,6 +94,9 @@ ul.tabs a{
 <p><input type="submit" value="Save"/></p>
 </form>
 </div>
+<?php if(_root::getParam('snapshot')):?>
+<script>alert('Snapshot done')</script>
+<?php endif;?>
 
 
 

@@ -111,22 +111,23 @@ class module_note extends abstract_module{
 	public function _archive(){
 		$oNote=model_note::getInstance()->findById( _root::getParam('id') );
 		
-		$sCurrent=null;
+		$tCurrent=array();
 		
 		$tNote= explode("\n",$oNote->content);
 		foreach($tNote as $i => $sLine){
-			$sCurrent.=$sLine."\n";
-			
 			if(substr($sLine,0,3)=='==='){
 				break;
 			}
+			
+			$tCurrent[]=$sLine;
+
 		}
 		
 		
-		$oNote->content=implode("\n",$tNote)."\n".'===archive '.date('d/m/Y')."\n".$sCurrent;
+		$oNote->content=implode("\n",$tCurrent)."\n".'===archive '.date('d/m/Y H\hi')."\n".implode("\n",$tNote);
 		$oNote->save();
 		
-		_root::redirect('note::show',array('id'=>$oNote->id));
+		_root::redirect('note::show',array('id'=>$oNote->id,'snapshot'=>'1'));
 		
 	}
 	

@@ -70,7 +70,7 @@ ul.tabs a{
 
 <ul class="tabs">
 	<li><a href="<?php echo _root::getLink('note::show',array('id'=>$this->oNote->id))?>">Current</a></li>
-	<li class="selected"><a href="<?php echo _root::getLink('note::history',array('id'=>$this->oNote->id))?>">History</a></li>
+	<li class="selected"><a href="<?php echo _root::getLink('note::history',array('id'=>$this->oNote->id))?>">Snapshots</a></li>
 </ul>
 
 <div class="notes">
@@ -89,11 +89,11 @@ ul.tabs a{
 		<?php continue;?>
 	<?php elseif(substr($sLine,0,3)=='==='):?>
 		<?php if($bStart):?></p><?php endif;?>
-		<p style="background:#ddd;font-weight:bold;border-bottom:2px solid black;margin-top:20px"><?php echo substr($sLine,3)?>
+		<p style="background:#ddd;font-weight:bold;border-top:2px solid black;margin-top:40px"><?php echo substr($sLine,3)?>
 		<?php $bStart=1;?>
 	<?php elseif(substr($sLine,0,2)=='=='):?>
 		<?php if($bStart):?></p><?php endif;?>
-		<p style="font-weight:bold;border-bottom:1px solid black;margin-top:20px"><?php echo substr($sLine,2)?>
+		<p style="font-weight:bold;border-bottom:1px solid gray;margin-top:20px"><?php echo substr($sLine,2)?>
 		<?php $bStart=1;?>
 	<?php elseif(substr($sLine,0,2)=='--' or substr($sLine,0,1)=='-'):?>
 		<?php if($bStart):?></p><?php endif;?>
