@@ -26,6 +26,20 @@ class row_note extends abstract_row{
 	
 	protected $sClassModel='model_note';
 	
+	public function findListProject(){
+		$tNote= explode("\n",$this->content);
+		$tProject=array();
+		foreach($tNote as $sLine){
+			if(substr($sLine,0,3)=='==='){
+				break;
+			}
+			if(substr($sLine,0,2)=='=='){
+				$tProject[]=substr($sLine,2);
+			}
+		}
+		return $tProject;
+	}
+	
 	/*exemple jointure 
 	public function findAuteur(){
 		return model_auteur::getInstance()->findById($this->auteur_id);

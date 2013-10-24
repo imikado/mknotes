@@ -131,6 +131,20 @@ class module_note extends abstract_module{
 		
 	}
 	
+	public function _diagram(){
+		$this->oLayout=new _layout('template2');
+		
+		$oNote=model_note::getInstance()->findById( _root::getParam('id') );
+		
+		$tProject=$oNote->findListProject();
+		
+		$oView=new _view('note::diagram');
+		$oView->oNote=$oNote;
+		$oView->tProject=$tProject;
+		
+		$this->oLayout->add('main',$oView);
+	}
+	
 	public function _preview(){ 
 		$this->oLayout=new _layout('preview');
 		$sText=_root::getParam('text');

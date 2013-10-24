@@ -99,3 +99,24 @@ padding:4px;
 margin:0px
 }
 
+.line:hover td{
+background:orange;
+}
+
+.taskOn{
+background:#4489c4;
+}
+.weekend{
+background:#ddd;
+}
+.empty{
+background:#eee;
+}
+
+.line:hover td.weekend{
+background:#ccc;
+}
+.line:hover td.taskOn{
+background:darkred;
+}
+
