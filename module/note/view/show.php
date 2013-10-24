@@ -71,7 +71,7 @@ ul.tabs a{
 <ul class="tabs">
 	<li class="selected"><a href="<?php echo _root::getLink('note::show',array('id'=>$this->oNote->id))?>">Current</a></li>
 	<li><a href="<?php echo _root::getLink('note::history',array('id'=>$this->oNote->id))?>">Snapshots</a></li>
-	<li><a href="<?php echo _root::getLink('note::diagram',array('id'=>$this->oNote->id))?>">Diagram</a></li>
+	<li><a href="<?php echo _root::getLink('note::diagram',array('id'=>$this->oNote->id))?>">Planning</a></li>
 </ul>
 
 <?php echo $this->oViewProcessed->show()?>
