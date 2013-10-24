@@ -33,8 +33,13 @@ class row_note extends abstract_row{
 			if(substr($sLine,0,3)=='==='){
 				break;
 			}
+			if(substr($sLine,0,2)=='--'){
+			}elseif(substr($sLine,0,1)=='-'){
+				$tProject[]=substr($sLine,1);
+			}
+			
 			if(substr($sLine,0,2)=='=='){
-				$tProject[]=substr($sLine,2);
+				$tProject[]=$sLine;
 			}
 		}
 		return $tProject;

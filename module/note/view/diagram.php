@@ -109,7 +109,7 @@ ul.tabs a{
 		?>
 		
 		<tr class="line">
-			<td class="empty"><?php echo $sProject?></td>
+			<td class="empty" <?php if(substr($sProject,0,2)=='=='):?>style="font-weight:bold"<?php endif;?>><?php echo $sProject?></td>
 			<td></td>
 			
 			<?php $oCurrentDate=new plugin_date(date('Y-m-d'));?>
