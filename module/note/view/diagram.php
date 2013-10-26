@@ -1,12 +1,19 @@
 <?php $tMonth=array('','Janvier','Fevrier','Mars','AVril','Mai','Juin','Juillet','Aout','Sept','Oct','Nov','Dec');
 $iStartDay=-15;
-$iEndDay=50;
+$iEndDay=_root::getParam('limit',50);
 
 $iTodayDate=(int)date('Ymd');
 ?>
 <script>
 function editLine(i){
 	document.location.href='<?php echo _root::getLink('note::diagram',array('id'=>_root::getParam('id'),'line'=>''),0)?>'+i;
+}
+function switchLimit(){
+	var a= getById('iLimit');
+	if(a){
+		var iLimit=a.value;
+		document.location.href='<?php echo _root::getLink('note::diagram',array('id'=>_root::getParam('id'),'limit'=>''),0)?>'+iLimit;
+	}
 }
 </script>
 <style>
@@ -32,6 +39,8 @@ ul.tabs a{
 	<li><a href="<?php echo _root::getLink('note::history',array('id'=>$this->oNote->id))?>">Snapshots</a></li>
 	<li class="selected"><a href="<?php echo _root::getLink('note::diagram',array('id'=>$this->oNote->id))?>">Planning</a></li>
 </ul>
+
+<p style="text-align:right"><input style="text-align:right" size="3" type="text" id="iLimit" value="<?php echo $iEndDay?>"/><input onclick="switchLimit()" type="button" value="Switch limit"/></p>
 
 <div style="margin:8px;width:1180px;overflow:auto">
 
@@ -129,10 +138,16 @@ ul.tabs a{
 			<td class="empty" <?php 
 				if(substr($sProject,0,2)=='=='):
 					?>style="font-weight:bold;"<?php
+					$sProject=substr($sProject,2);
+				elseif(substr($sProject,0,3)=='---'): 
+					?>style="padding-left:40px;"<?php
+					$sProject=substr($sProject,3);
 				elseif(substr($sProject,0,2)=='--'): 
-					?>style="padding-left:20px;"<?php
+					?>style="padding-left:25px;"<?php
+					$sProject=substr($sProject,2);
 				elseif(substr($sProject,0,1)=='-'): 
 					?>style="padding-left:10px;"<?php
+					$sProject=substr($sProject,1);
 				endif;?>><?php echo $sProject?></td>
 			<td>
 				<?php if($bEdit):?>

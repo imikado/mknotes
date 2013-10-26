@@ -16,15 +16,18 @@
 		<?php if($bStart):?></p><?php endif;?>
 		<p style="font-weight:bold;border-bottom:1px solid black;margin-top:20px"><?php echo substr($sLine,2)?>
 		<?php $bStart=1;?>
-	<?php elseif(substr($sLine,0,2)=='--' or substr($sLine,0,1)=='-'):?>
+	<?php elseif(substr($sLine,0,3)=='---' or substr($sLine,0,2)=='--' or substr($sLine,0,1)=='-'):?>
 		<?php if($bStart):?></p><?php endif;?>
 		<p style="<?php
-			if(substr($sLine,0,2)=='--'):
+			if(substr($sLine,0,3)=='---'):
+				$sText=substr($sLine,3);
+				?>border:1px solid gray;margin-left:45px;margin-top:2px;background:#eee<?php
+			elseif(substr($sLine,0,2)=='--'):
 				$sText=substr($sLine,2);
 				?>border:1px solid gray;margin-left:30px;margin-top:2px;background:#eee<?php
 			elseif(substr($sLine,0,1)=='-'):
 				$sText=substr($sLine,1);
-				?>border:1px solid gray;margin-left:15px;background:#cddde3;margin-top:4px<?php
+				?>border:1px solid gray;margin-left:15px;background:#b3d1dc;margin-top:4px<?php
 			endif;
 			
 			if(preg_match('/'.module_note::getOk().'/',$sLine)):
