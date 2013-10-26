@@ -29,17 +29,18 @@ class row_note extends abstract_row{
 	public function findListProject(){
 		$tNote= explode("\n",$this->content);
 		$tProject=array();
-		foreach($tNote as $sLine){
+		foreach($tNote as $i => $sLine){
 			if(substr($sLine,0,3)=='==='){
 				break;
 			}
 			if(substr($sLine,0,2)=='--'){
+				$tProject[$i]=$sLine;
 			}elseif(substr($sLine,0,1)=='-'){
-				$tProject[]=substr($sLine,1);
+				$tProject[$i]=$sLine;
 			}
 			
 			if(substr($sLine,0,2)=='=='){
-				$tProject[]=$sLine;
+				$tProject[$i]=$sLine;
 			}
 		}
 		return $tProject;

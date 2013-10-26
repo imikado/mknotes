@@ -132,6 +132,8 @@ class module_note extends abstract_module{
 	}
 	
 	public function _diagram(){
+		$this->processDiagram();
+		
 		$this->oLayout=new _layout('template2');
 		
 		$oNote=model_note::getInstance()->findById( _root::getParam('id') );
@@ -153,6 +155,33 @@ class module_note extends abstract_module{
 		
 		
 		$this->oLayout->add('main',$oView);
+	}
+	
+	private function processDiagram(){
+		if(!_root::getRequest()->isPost() ){ //si ce n'est pas une requete POST on ne soumet pas
+			return null;
+		}
+		
+		$oNote=model_note::getInstance()->findById( _root::getParam('id',null) );
+		
+		$tDate=_root::getParam('tDate');
+		$sMaxDate=$tDate[ count($tDate)-1 ];
+		
+		$tNote= explode("\n",$oNote->content);
+		//plugin_debug::addSpy('tNote',$tNote);
+		foreach($tNote as $i => $sLine){
+			if($i == _root::getParam('line')){
+				
+				$sLine=preg_replace('/\[([0-9\/-]*)\]/','',$sLine);
+				$sLine.= '['.$tDate[0].'-'.$sMaxDate.']';
+			}
+			$tNote[$i]=$sLine;
+			
+		}
+		$oNote->content=implode("\n",$tNote);
+		$oNote->save();
+		
+		_root::redirect('note::diagram',array('id'=>$oNote->id));
 	}
 	
 	private function processSaveChecked(){

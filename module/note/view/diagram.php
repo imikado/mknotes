@@ -4,6 +4,11 @@ $iEndDay=50;
 
 $iTodayDate=(int)date('Ymd');
 ?>
+<script>
+function editLine(i){
+	document.location.href='<?php echo _root::getLink('note::diagram',array('id'=>_root::getParam('id'),'line'=>''),0)?>'+i;
+}
+</script>
 <style>
 ul.tabs li{
 display:inline;
@@ -28,10 +33,17 @@ ul.tabs a{
 	<li class="selected"><a href="<?php echo _root::getLink('note::diagram',array('id'=>$this->oNote->id))?>">Planning</a></li>
 </ul>
 
-<table>
+<div style="margin:8px;width:1180px;overflow:auto">
+
+<?php if(_root::getParam('line',-1)):?>
+<form action="" method="POST">
+<?php endif;?>
+
+	
+<table style="margin:20px 0px;">
 	
 	<tr>
-		<th rowspan="2">Project</th>
+		<th rowspan="2"><div style="width:300px">Project</div></th>
 		<td rowspan="2"></td>
 		
 		<?php $oCurrentDate=new plugin_date(date('Y-m-d'));?>
@@ -90,7 +102,7 @@ ul.tabs a{
 		
 	</tr>
 	
-	<?php foreach($this->tProject as $sProject):?>
+	<?php foreach($this->tProject as $iLine => $sProject):?>
 		<?php 
 		$iStartDate=0;
 		$iEndDate=0;
@@ -106,11 +118,28 @@ ul.tabs a{
 			$iStartDate=(int)$oStartDate->toString('Ymd');
 			$iEndDate=(int)$oEndDate->toString('Ymd');
 		}
+		$bEdit=0;
+		if(_root::getParam('line',-1)==$iLine){
+			$bEdit=1;
+		}
+		
 		?>
 		
-		<tr class="line">
-			<td class="empty" <?php if(substr($sProject,0,2)=='=='):?>style="font-weight:bold"<?php endif;?>><?php echo $sProject?></td>
-			<td></td>
+		<tr class="line" <?php if($bEdit==0):?>onclick="editLine(<?php echo $iLine?>)"; style="cursor:pointer"<?php endif;?>>
+			<td class="empty" <?php 
+				if(substr($sProject,0,2)=='=='):
+					?>style="font-weight:bold;"<?php
+				elseif(substr($sProject,0,2)=='--'): 
+					?>style="padding-left:20px;"<?php
+				elseif(substr($sProject,0,1)=='-'): 
+					?>style="padding-left:10px;"<?php
+				endif;?>><?php echo $sProject?></td>
+			<td>
+				<?php if($bEdit):?>
+				<input type="submit" value="valid"/>
+				<br/><a href="<?php echo _root::getLink('note::diagram',array('id'=>_root::getParam('id')))?>">cancell</a>
+				<?php endif;?>
+			</td>
 			
 			<?php $oCurrentDate=new plugin_date(date('Y-m-d'));?>
 			<?php $oCurrentDate->addDay($iStartDay);?>
@@ -122,6 +151,7 @@ ul.tabs a{
 				$sClass='empty';
 				$oCurrentDate->addDay(1);
 				$iCurrentDate=(int)$oCurrentDate->toString('Ymd');
+				$sInputCurrentDate=$oCurrentDate->toString('d/m/Y');
 				if($iStartDate <= $iCurrentDate and $iEndDate >= $iCurrentDate ):
 					$sClass='taskOn';
 				elseif($oCurrentDate->toString('w') == 6 or $oCurrentDate->toString('w') == 0):
@@ -133,9 +163,17 @@ ul.tabs a{
 				}
 				?>
 				
-				<td class="<?php echo $sClass?>" style="font-size:8px;border:<?php echo $border?>px solid darkred">
-					&nbsp;
-				</td>
+				
+				<?php if($bEdit):?>
+					<td class="<?php echo $sClass?>" style="font-size:8px;border:<?php echo $border?>px solid darkred"><input name="tDate[]" value="<?php echo $sInputCurrentDate?>" <?php if($sClass=='taskOn'):?>checked="checked"<?php endif;?> type="checkbox"/></td>
+				<?php else:?>
+				
+				
+					<td class="<?php echo $sClass?>" style="font-size:8px;border:<?php echo $border?>px solid darkred">
+						&nbsp;
+					</td>
+				
+				<?php endif;?>
 				
 				
 			<?php endfor;?>
@@ -144,3 +182,9 @@ ul.tabs a{
 		</tr>
 	<?php endforeach;?>
 </table>
+
+<?php if(_root::getParam('line',-1)):?>
+</form>
+<?php endif;?>
+
+</div>

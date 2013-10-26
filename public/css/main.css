@@ -99,6 +99,14 @@ padding:4px;
 margin:0px
 }
 
+.line td{
+width:16px;
+padding:0px;
+}
+.line input{
+margin:0px;
+}
+
 .line:hover td{
 background:orange;
 }
