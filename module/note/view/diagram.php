@@ -15,6 +15,20 @@ function switchLimit(){
 		document.location.href='<?php echo _root::getLink('note::diagram',array('id'=>_root::getParam('id'),'limit'=>''),0)?>'+iLimit;
 	}
 }
+function checkUncheck(sDate){
+	var a=getById('input_'+sDate);
+	var b=getById('td_'+sDate);
+	
+	if(a && b){
+		if(a.checked){
+			b.style.background='silver';
+			a.checked=0;
+		}else{
+			b.style.background='darkgreen';
+			a.checked=1;
+		}
+	}
+}
 </script>
 <style>
 ul.tabs li{
@@ -44,7 +58,7 @@ ul.tabs a{
 
 <div style="margin:8px;width:1180px;overflow:auto">
 
-<?php if(_root::getParam('line',-1)):?>
+<?php if(_root::getParam('line',-1) > -1):?>
 <form action="" method="POST">
 <?php endif;?>
 
@@ -52,8 +66,10 @@ ul.tabs a{
 <table style="margin:20px 0px;">
 	
 	<tr>
-		<th rowspan="2"><div style="width:300px">Project</div></th>
 		<td rowspan="2"></td>
+		
+		<th rowspan="2"><div style="width:350px">Project</div></th>
+		
 		
 		<?php $oCurrentDate=new plugin_date(date('Y-m-d'));?>
 		<?php $oCurrentDate->addDay($iStartDay);?>
@@ -134,7 +150,17 @@ ul.tabs a{
 		
 		?>
 		
-		<tr class="line" <?php if($bEdit==0):?>onclick="editLine(<?php echo $iLine?>)"; style="cursor:pointer"<?php endif;?>>
+		<tr class="line" <?php if($bEdit==1):?>style="cursor:pointer"<?php elseif($bEdit==0):?>onclick="editLine(<?php echo $iLine?>)"; style="cursor:pointer"<?php endif;?>>
+			
+			<td>
+				<?php if($bEdit):?>
+					<div  style="width:90px">
+					<input type="submit" value="valid"/> 
+					<a href="<?php echo _root::getLink('note::diagram',array('id'=>_root::getParam('id')))?>">cancell</a>
+					</div>
+				<?php endif;?>
+			</td>
+			
 			<td class="empty" <?php 
 				if(substr($sProject,0,2)=='=='):
 					?>style="font-weight:bold;"<?php
@@ -149,12 +175,7 @@ ul.tabs a{
 					?>style="padding-left:10px;"<?php
 					$sProject=substr($sProject,1);
 				endif;?>><?php echo $sProject?></td>
-			<td>
-				<?php if($bEdit):?>
-				<input type="submit" value="valid"/>
-				<br/><a href="<?php echo _root::getLink('note::diagram',array('id'=>_root::getParam('id')))?>">cancell</a>
-				<?php endif;?>
-			</td>
+			
 			
 			<?php $oCurrentDate=new plugin_date(date('Y-m-d'));?>
 			<?php $oCurrentDate->addDay($iStartDay);?>
@@ -180,7 +201,7 @@ ul.tabs a{
 				
 				
 				<?php if($bEdit):?>
-					<td class="<?php echo $sClass?>" style="font-size:8px;border:<?php echo $border?>px solid darkred"><input name="tDate[]" value="<?php echo $sInputCurrentDate?>" <?php if($sClass=='taskOn'):?>checked="checked"<?php endif;?> type="checkbox"/></td>
+					<td onclick="checkUncheck('<?php echo $sInputCurrentDate?>')" id="td_<?php echo $sInputCurrentDate?>" class="<?php echo $sClass?>" style="font-size:8px;border:<?php echo $border?>px solid darkred"><input style="display:none" id="input_<?php echo $sInputCurrentDate?>" name="tDate[]" value="<?php echo $sInputCurrentDate?>" <?php if($sClass=='taskOn'):?>checked="checked"<?php endif;?> type="checkbox"/></td>
 				<?php else:?>
 				
 				
@@ -198,7 +219,7 @@ ul.tabs a{
 	<?php endforeach;?>
 </table>
 
-<?php if(_root::getParam('line',-1)):?>
+<?php if(_root::getParam('line',-1) > -1):?>
 </form>
 <?php endif;?>
 
