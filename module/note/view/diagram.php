@@ -197,6 +197,12 @@ ul.tabs a{
 				if($iTodayDate == $iCurrentDate){
 					$border=2;
 				}
+				
+				$accolade=null;
+				if(isset($this->tMinMax[$sProject]) and $this->tMinMax[$sProject]['min'] <= $iCurrentDate and $this->tMinMax[$sProject]['max'] >= $iCurrentDate ){
+					$accolade=';border-top:3px solid #569ea9';
+				}
+				
 				?>
 				
 				
@@ -205,7 +211,7 @@ ul.tabs a{
 				<?php else:?>
 				
 				
-					<td class="<?php echo $sClass?>" style="font-size:8px;border:<?php echo $border?>px solid darkred">
+					<td class="<?php echo $sClass?>" style="font-size:8px;border:<?php echo $border?>px solid darkred<?php echo $accolade?>">
 						&nbsp;
 					</td>
 				

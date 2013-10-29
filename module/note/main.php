@@ -140,9 +140,39 @@ class module_note extends abstract_module{
 		
 		$tProject=$oNote->findListProject();
 		
+		$tMinMax=array();
+		$sKey=null;
+		foreach($tProject as $sLine){
+			if(substr($sLine,0,2)=='=='){
+				$sKey=substr($sLine,2);
+			}
+			if(preg_match('/\[([0-9\/-]*)\]/',$sLine)){
+				preg_match('/\[([0-9\/-]*)\]/',$sLine,$tMatchDate);
+				list($sStartDate,$sEndDate)=explode('-',$tMatchDate[1]);
+				
+				$oStartDate=new plugin_date($sStartDate,'d/m/Y');
+				$oEndDate=new plugin_date($sEndDate,'d/m/Y');
+				
+				$iStartDate=(int)$oStartDate->toString('Ymd');
+				$iEndDate=(int)$oEndDate->toString('Ymd');
+				
+				if(!isset($tMinMax[$sKey]['min']) or $tMinMax[$sKey]['min'] > $iStartDate){
+					$tMinMax[$sKey]['min']=$iStartDate;
+				}
+				
+				if(!isset($tMinMax[$sKey]['max']) or $tMinMax[$sKey]['max'] < $iEndDate){
+					$tMinMax[$sKey]['max']=$iEndDate;
+				}
+				
+			}
+		}
+		
+		plugin_debug::addSpy('tMinm',$tMinMax);
+		
 		$oView=new _view('note::diagram');
 		$oView->oNote=$oNote;
 		$oView->tProject=$tProject;
+		$oView->tMinMax=$tMinMax;
 		
 		$this->oLayout->add('main',$oView);
 	}
@@ -173,7 +203,7 @@ class module_note extends abstract_module{
 			if($i == _root::getParam('line')){
 				
 				$sLine=preg_replace('/\[([0-9\/-]*)\]/','',$sLine);
-				$sLine.= '['.$tDate[0].'-'.$sMaxDate.']';
+				$sLine.= ' ['.$tDate[0].'-'.$sMaxDate.']';
 			}
 			$tNote[$i]=$sLine;
 			
