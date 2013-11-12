@@ -8,8 +8,18 @@
 </head>
 <body>
 
-<div class="main" style="width:1200px">
-	<div class="content" style="width:1200px">
+<div class="main" style="width:1300px">
+	<p>
+		<a href="<?php echo _root::getLink('note::index')?>">Liste notes</a> | 
+		
+		<?php if(_root::getAuth() and _root::getAuth()->getAccount() and _root::getAuth()->getAccount()->admin):?>
+			<a href="<?php echo _root::getLink('note::admin')?>">Admin multi-notes</a> | 
+		<?php endif;?> 
+		
+		<a href="<?php echo _root::getLink('auth::logout')?>">Logout</a> 
+	
+	</p>
+	<div class="content" style="width:1300px">
 		<?php echo $this->load('main') ?>
 	</div>
 </div>

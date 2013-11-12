@@ -56,7 +56,7 @@ ul.tabs a{
 
 <p style="text-align:right"><input style="text-align:right" size="3" type="text" id="iLimit" value="<?php echo $iEndDay?>"/><input onclick="switchLimit()" type="button" value="Switch limit"/></p>
 
-<div style="margin:8px;width:1180px;overflow:auto">
+<div style="margin:8px;width:1280px;overflow:auto">
 
 <?php if(_root::getParam('line',-1) > -1):?>
 <form action="" method="POST">
@@ -148,6 +148,12 @@ ul.tabs a{
 			$bEdit=1;
 		}
 		
+		if(isset($this->tMember)):
+				foreach($this->tMember as $sLogin):
+					$sProject=preg_replace('/@'.$sLogin.'/','<span style="font-weight:bold;color:darkgreen">@'.$sLogin.'</span>',$sProject);
+				endforeach;
+			endif;
+		
 		?>
 		
 		<tr class="line" <?php if($bEdit==1):?>style="cursor:pointer"<?php elseif($bEdit==0):?>onclick="editLine(<?php echo $iLine?>)"; style="cursor:pointer"<?php endif;?>>
@@ -174,7 +180,8 @@ ul.tabs a{
 				elseif(substr($sProject,0,1)=='-'): 
 					?>style="padding-left:10px;"<?php
 					$sProject=substr($sProject,1);
-				endif;?>><?php echo $sProject?></td>
+				endif;
+				?>><?php echo $sProject?></td>
 			
 			
 			<?php $oCurrentDate=new plugin_date(date('Y-m-d'));?>
@@ -200,7 +207,7 @@ ul.tabs a{
 				
 				$accolade=null;
 				if(isset($this->tMinMax[$sProject]) and $this->tMinMax[$sProject]['min'] <= $iCurrentDate and $this->tMinMax[$sProject]['max'] >= $iCurrentDate ){
-					$accolade=';border-top:3px solid #569ea9';
+					$accolade=';border-top:4px solid #043f70';
 				}
 				
 				?>

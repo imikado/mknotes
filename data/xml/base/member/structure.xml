@@ -3,4 +3,5 @@
 <colonne primaire="true">id</colonne>
 <colonne>login</colonne>
 <colonne>pass</colonne>
+<colonne>admin</colonne>
 </structure>

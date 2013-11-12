@@ -40,6 +40,17 @@ class model_member extends abstract_model{
 		return sha1('A2fereAF45Dds456'.$sPassword);
 	}
 	
+	public function getSelect(){
+		 $tAccount=$this->findAll();
+		 
+		 $tIndex=array();
+		 foreach($tAccount as $oMember){
+			 $tIndex[ $oMember->id ]= $oMember->login;
+		 }
+		 
+		 return $tIndex;
+	}
+	
 	
 }
 

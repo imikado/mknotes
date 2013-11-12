@@ -36,6 +36,13 @@
 			endif;
 
 			?>"><?php
+			
+			if(isset($this->tMember)):
+				foreach($this->tMember as $sLogin):
+					$sText=preg_replace('/@'.$sLogin.'/','<span style="font-weight:bold;color:darkgreen">@'.$sLogin.'</span>',$sText);
+				endforeach;
+			endif;
+			
 
 			if($this->bWrite==1):
 				?><span style="float:right">

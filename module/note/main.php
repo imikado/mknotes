@@ -17,6 +17,129 @@ class module_note extends abstract_module{
 	    $this->_list();
 	}
 	
+	public function _admin(){
+		$this->oLayout=new _layout('template2');
+		
+		$tMember=model_member::getInstance()->getSelect();
+		
+		$tNote=model_note::getInstance()->findAllAdmin();
+		
+		$tContent=array();
+		foreach($tNote as $oNote){
+			
+			if(!isset($tMember[$oNote->member_id])){
+				continue;
+			}
+			
+			$tLine=preg_split('/\n/',$oNote->content);
+			foreach($tLine as $sLine){
+				if(substr($sLine,0,3)=='==='){
+					break;
+				}
+				
+				
+				if($sLine!='' ){
+					$sLine.=' @'.$tMember[$oNote->member_id];
+				}
+				
+				$tContent[]=$sLine;
+				
+				
+			}
+		}
+		
+		$tHashtag=array();
+		$sHashtag=null;
+		$tProject=array();
+		$sProject=null;
+		foreach($tContent as $sLine){
+			if(trim($sLine)=='') continue;
+			
+			if(substr($sLine,0,2)=='==' and preg_match('/#([a-zA-Z]*)/',$sLine)){
+				preg_match('/#([a-zA-Z]*)/',$sLine,$tMatch);
+				
+				$sHashtag=$tMatch[1];
+				$sProject=null;
+				
+				$tHashtag[$sHashtag][]=$sLine;
+				if(!isset($tProject[$sHashtag])){
+					$sLine=preg_replace('/#'.$sHashtag.'/','<span style="color:darkred">#'.$sHashtag.'</span>',$sLine);
+					$tProject[$sHashtag][]=$sLine;
+				}
+				
+			}elseif(substr($sLine,0,2)=='==' ){
+				$sProject=substr($sLine,2);
+				$sHashtag=null;
+				
+				$tProject[$sProject][]=$sLine;
+			}elseif($sHashtag!=''){
+				$tProject[$sHashtag][]=$sLine;
+			}elseif($sProject!=''){
+				$tProject[$sProject][]=$sLine;	
+			}
+			
+			
+		}
+		
+		
+		$oView=new _view('note::admin');
+		$oView->tMember=$tMember;
+		$this->oLayout->add('main',$oView);
+
+		/*
+		$oView=new _view('note::process');
+		$oView->content=$sContent;
+		$oView->tMember=$tMember;
+		$oView->bWrite=0;*/
+		
+		
+		
+		//diagramm		
+		//$tProject=$tContent;
+		
+		$tMinMax=array();
+		$sKey=null;
+		
+		foreach($tContent as $sLine){
+			if(substr($sLine,0,2)=='==' and preg_match('/#([a-zA-Z]*)/',$sLine)){
+				preg_match('/#([a-zA-Z]*)/',$sLine,$tMatch);
+				
+				$sKey=$tMatch[1];
+			}elseif(substr($sLine,0,2)=='=='){
+				$sKey=substr($sLine,2);
+			}
+			if(preg_match('/\[([0-9\/-]*)\]/',$sLine)){
+				preg_match('/\[([0-9\/-]*)\]/',$sLine,$tMatchDate);
+				list($sStartDate,$sEndDate)=explode('-',$tMatchDate[1]);
+				
+				$oStartDate=new plugin_date($sStartDate,'d/m/Y');
+				$oEndDate=new plugin_date($sEndDate,'d/m/Y');
+				
+				$iStartDate=(int)$oStartDate->toString('Ymd');
+				$iEndDate=(int)$oEndDate->toString('Ymd');
+				
+				if(!isset($tMinMax[$sKey]['min']) or $tMinMax[$sKey]['min'] > $iStartDate){
+					$tMinMax[$sKey]['min']=$iStartDate;
+				}
+				
+				if(!isset($tMinMax[$sKey]['max']) or $tMinMax[$sKey]['max'] < $iEndDate){
+					$tMinMax[$sKey]['max']=$iEndDate;
+				}
+				
+			}
+		}
+		
+		plugin_debug::addSpy('tMinm',$tMinMax);
+		
+		$oView=new _view('note::diagramadmin');
+		$oView->oNote=$oNote;
+		$oView->tProject=$tProject;
+		$oView->tMinMax=$tMinMax;
+		$oView->tMember=$tMember;
+		
+		$this->oLayout->add('main',$oView);
+	}
+	
 	public function _list(){
 		
 		$tNote=model_note::getInstance()->findAll();

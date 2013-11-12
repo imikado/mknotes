@@ -19,6 +19,9 @@ class model_note extends abstract_model{
 		return $this->findMany('SELECT * FROM '.$this->sTable.' WHERE member_id=?',_root::getAuth()->getAccount()->id);
 	}
 	
+	public function findAllAdmin(){
+		return $this->findMany('SELECT * FROM '.$this->sTable.' ');
+	}
 	
 }
 
@@ -45,6 +48,62 @@ class row_note extends abstract_row{
 		}
 		return $tProject;
 	}
+	
+	public function findListOnlyProject(){
+		$tNote= explode("\n",$this->content);
+		$tProject=array();
+		foreach($tNote as $i => $sLine){
+			if(substr($sLine,0,3)=='==='){
+				break;
+			}
+			
+			if(substr($sLine,0,2)=='=='){
+				$tProject[$i]=$sLine;
+			}
+		}
+		return $tProject;
+	}
+	
+	public function findListProjetWithTask(){
+		$tNote= explode("\n",$this->content);
+		$tProject=array();
+		$sProject=null;
+		foreach($tNote as $i => $sLine){
+			if(substr($sLine,0,3)=='==='){
+				break;
+			}
+			
+			if(substr($sLine,0,2)=='=='){
+				$sProject=substr($sProject,2);
+			}else if($sProject!=''){
+				$tProject[$sProject].=$sLine;
+			}
+		}
+		return $tProject;
+	}
+	
+	public function findListHashtagWithTask(){
+		$tNote= explode("\n",$this->content);
+		$tProject=array();
+		$sProject=null;
+		foreach($tNote as $i => $sLine){
+			if(substr($sLine,0,3)=='==='){
+				break;
+			}
+			
+			if(substr($sLine,0,2)=='=='){
+				if(preg_match('/#([a-zA-Z]*)')){
+					preg_match('/#([a-zA-Z]*)',$tMatch);
+					print_r($tMatch[1]);exit;
+					$sProject=substr($sProject,2);
+				}
+			}else if($sProject!=''){
+				$tProject[$sProject].=$sLine;
+			}
+		}
+		return $tProject;
+	}
+	
 	
 	/*exemple jointure 
 	public function findAuteur(){
