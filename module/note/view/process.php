@@ -8,6 +8,8 @@
 	
 	<?php if(substr($sLine,0,3)=='==='):?>
 		<?php break;?>
+	<?php elseif(preg_match('/'.module_note::getHide().'/',$sLine)):?>
+		<?php break;?>
 	<?php endif;?>
 
 	<?php if($bArchive):?>
@@ -33,6 +35,8 @@
 			if(preg_match('/'.module_note::getOk().'/',$sLine)):
 				?>;background:#66c673<?php
 				$bOk=1;
+			elseif(preg_match('/'.module_note::getRun().'/',$sLine)):
+				?>;background:orange<?php
 			endif;
 
 			?>"><?php

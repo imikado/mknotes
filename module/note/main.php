@@ -21,6 +21,12 @@ class module_note extends abstract_module{
 	public static function getOk(){
 		return ' OK';
 	}
+	public static function getRun(){
+		return ' RUN';
+	}
+	public static function getHide(){
+		return ' HIDE';
+	}
 	
 	public function _index(){
 	    //on considere que la page par defaut est la page de listage
@@ -259,8 +265,8 @@ class module_note extends abstract_module{
 		$tContent=preg_split('/\n/',$sContent);
 	
 		foreach($tContent as $i => $sLine){
-			if(preg_match('/#([a-zA-Z]*)/',$sLine) ){ 
-				preg_match('/#([a-zA-Z]*)/',$sLine,$tMatch);
+			if(preg_match('/#([a-zA-Z]+)/',$sLine) ){ 
+				preg_match('/#([a-zA-Z]+)/',$sLine,$tMatch);
 				
 				$sHashtag=$tMatch[1];
 				
@@ -428,6 +434,9 @@ class module_note extends abstract_module{
 		$oView->tMinMax=$tMinMax;
 		$oView->oModuleNote=$this;
 		$oView->tLinkHashtag=$this->tLinkHashtag;
+		$oView->tHashtag=$this->tHashtag;
+		
+		plugin_debug::addSpy('tHashtag',$this->tHashtag);
 		
 		$this->oLayout->add('main',$oView);
 	}
@@ -690,9 +699,13 @@ class module_note extends abstract_module{
 		foreach($this->tMember as $member_id => $sLogin){
 			$sProject=preg_replace('/@'.$sLogin.'/','<a target="_blank" href="'._root::getLink('note::adminEditByMember',array('member_id'=>$member_id)).'" style=";color:darkgreen">@'.$sLogin.'</span>',$sProject);
 		}
-		if(preg_match('/#([a-zA-Z]+)/',$sProject)){
-			preg_match('/#([a-zA-Z]*)/',$sProject,$tMatch);
+		if(preg_match('/#([a-zA-Z]+)/',$sProject) and !preg_match('/#quot/i',$sProject)){
+			preg_match('/#([a-zA-Z]+)/',$sProject,$tMatch);
 			$sProject=str_replace('#'.$tMatch[1],'<span style="color:darkred">'.'#'.$tMatch[1].'</span>',$sProject);
+		}
+		if(preg_match('/!([a-zA-Z]+)/',$sProject) and !preg_match('/#quot/i',$sProject)){
+			preg_match('/!([a-zA-Z]+)/',$sProject,$tMatch);
+			$sProject=str_replace('!'.$tMatch[1],'<span style="color:red">'.'!'.$tMatch[1].'</span>',$sProject);
 		}
 		
 		
@@ -822,11 +835,13 @@ class module_note extends abstract_module{
 			
 			$iStartDate=(int)$oStartDate->toString('Ymd');
 			$iEndDate=(int)$oEndDate->toString('Ymd');
+			
+			$sEndDate=$oEndDate->toString('d/m/Y');
 		}
 		
-		if(preg_match('/#([a-zA-Z]*)/',$sProject) and $sEndDate){
+		if(preg_match('/#([a-zA-Z]+)/',$sProject) and $sEndDate){
 			
-			preg_match('/#([a-zA-Z]*)/',$sProject,$tMatch);
+			preg_match('/#([a-zA-Z]+)/',$sProject,$tMatch);
 			
 			$sHashtag=$tMatch[1];
 			$this->tLink[$sHashtag]=$sEndDate;
@@ -853,6 +868,13 @@ class module_note extends abstract_module{
 			preg_match('/@([a-zA-Z]*)/',$sProject,$tMatch);
 			return $tMatch[1];
 		}
+	}
+	public function getJalon($sProject){
+		if(preg_match('/!([a-zA-Z]+)/',$sProject)){
+			preg_match('/!([a-zA-Z]+)/',$sProject,$tMatch);
+			return $tMatch[1];
+		}
+		return null;
 	}
 	
 

@@ -167,6 +167,8 @@ ul.tabs a{
 		list($iStartDate,$iEndDate)=$this->oModuleNote->calculateListDate($sProject);
 		$iCharge=$this->oModuleNote->calculCharge($sProject);
 		$sDev=_root::getAuth()->getAccount()->login;
+		
+		$sJalon=$this->oModuleNote->getJalon($sProject);
 			
 		$bEdit=0;
 		$sAction=null;
@@ -272,6 +274,12 @@ ul.tabs a{
 					$sLink=';border-right:2px dotted black';
 				}
 				
+				$sJalonBurned=null;
+				if($sClass=='taskOn' and $sJalon!='' and isset($this->tHashtag[$sJalon]) and $iCurrentDate > $this->tHashtag[$sJalon]['enddate'] ){
+					
+					$sJalonBurned=';background:red';
+				}
+				
 				?>
 				
 				
@@ -282,7 +290,7 @@ ul.tabs a{
 				<?php else:?>
 				
 				
-					<td class="<?php echo $sClass?>" style="font-size:8px;border:<?php echo $border?>px solid darkred<?php echo $accolade?><?php echo $sLink?>">
+					<td class="<?php echo $sClass?>" style="font-size:8px;border:<?php echo $border?>px solid darkred<?php echo $accolade?><?php echo $sLink?><?php echo $sJalonBurned?>">
 						&nbsp;
 					</td>
 				
