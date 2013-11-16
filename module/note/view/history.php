@@ -72,6 +72,10 @@ ul.tabs a{
 	<li><a href="<?php echo _root::getLink('note::show',array('id'=>$this->oNote->id))?>">Current</a></li>
 	<li class="selected"><a href="<?php echo _root::getLink('note::history',array('id'=>$this->oNote->id))?>">Snapshots</a></li>
 	<li><a href="<?php echo _root::getLink('note::diagram',array('id'=>$this->oNote->id))?>">Planning</a></li>
+	
+	<?php if(_root::getAuth() and _root::getAuth()->getAccount() and _root::getAuth()->getAccount()->admin):?>
+		<li><a href="<?php echo _root::getLink('note::admin')?>">Planning g&eacute;n&eacute;ral</a> </li>
+	<?php endif;?> 
 </ul>
 
 <div class="notes">

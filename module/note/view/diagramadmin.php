@@ -3,6 +3,9 @@ $iStartDay=-15;
 $iEndDay=_root::getParam('limit',50);
 
 $iTodayDate=(int)date('Ymd');
+
+$tChargeDev=array();
+$tNbChargeDev=array();
 ?>
 <script>
 
@@ -36,7 +39,11 @@ ul.tabs a{
 <ul class="tabs">
 	<li><a href="<?php echo _root::getLink('note::show',array('id'=>$this->oNote->id))?>">Current</a></li>
 	<li><a href="<?php echo _root::getLink('note::history',array('id'=>$this->oNote->id))?>">Snapshots</a></li>
-	<li class="selected"><a href="<?php echo _root::getLink('note::diagram',array('id'=>$this->oNote->id))?>">Planning</a></li>
+	<li><a href="<?php echo _root::getLink('note::diagram',array('id'=>$this->oNote->id))?>">Planning</a></li>
+	
+	<?php if(_root::getAuth() and _root::getAuth()->getAccount() and _root::getAuth()->getAccount()->admin):?>
+		<li class="selected"><a href="<?php echo _root::getLink('note::admin')?>">Planning g&eacute;n&eacute;ral</a> </li>
+	<?php endif;?> 
 </ul>
 
 <p style="text-align:right"><input style="text-align:right" size="3" type="text" id="iLimit" value="<?php echo $iEndDay?>"/><input onclick="switchLimit()" type="button" value="Switch limit"/></p>
@@ -123,29 +130,12 @@ ul.tabs a{
 			<?php 
 			//$sProject0=substr($sProject0,2);
 			
-			$iStartDate=0;
-			$iEndDate=0;
-			if(preg_match('/\[([0-9\/-]*)\]/',$sProject)){
-				preg_match('/\[([0-9\/-]*)\]/',$sProject,$tMatchDate);
-				list($sStartDate,$sEndDate)=explode('-',$tMatchDate[1]);
-				plugin_debug::addSpy('sStartDate',$sStartDate);
-				plugin_debug::addSpy('sEndDate',$sEndDate);
-				
-				$oStartDate=new plugin_date($sStartDate,'d/m/Y');
-				$oEndDate=new plugin_date($sEndDate,'d/m/Y');
-				
-				$iStartDate=(int)$oStartDate->toString('Ymd');
-				$iEndDate=(int)$oEndDate->toString('Ymd');
-			}
+			list($iStartDate,$iEndDate)=$this->oModuleNote->calculateListDate($sProject);
+			$iCharge=$this->oModuleNote->calculCharge($sProject);
+			$sDev=$this->oModuleNote->getDev($sProject);
+			
 			$bEdit=0;
 		
-			
-			if(isset($this->tMember)):
-					foreach($this->tMember as $sLogin):
-						$sProject=preg_replace('/@'.$sLogin.'/','<span style=";color:darkgreen">@'.$sLogin.'</span>',$sProject);
-					endforeach;
-				endif;
-			
 			$bProject=0;
 			
 			?>
@@ -171,7 +161,7 @@ ul.tabs a{
 						?>style="padding-left:10px;"<?php
 						$sProject=substr($sProject,1);
 					endif;
-					?>><?php echo $sProject?></td>
+					?>><div style="width:450px"><?php echo $this->oModuleNote->format($sProject)?></div></td>
 				
 				
 				<?php $oCurrentDate=new plugin_date(date('Y-m-d'));?>
@@ -185,10 +175,23 @@ ul.tabs a{
 					$oCurrentDate->addDay(1);
 					$iCurrentDate=(int)$oCurrentDate->toString('Ymd');
 					$sInputCurrentDate=$oCurrentDate->toString('d/m/Y');
-					if($iStartDate <= $iCurrentDate and $iEndDate >= $iCurrentDate ):
-						$sClass='taskOn';
-					elseif($oCurrentDate->toString('w') == 6 or $oCurrentDate->toString('w') == 0):
+					
+					if($oCurrentDate->toString('w') == 6 or $oCurrentDate->toString('w') == 0):
 						$sClass='weekend';
+					elseif($iStartDate <= $iCurrentDate and $iEndDate >= $iCurrentDate ):
+						$sClass='taskOn';
+						
+						if(!isset($tChargeDev[$iCurrentDate])){
+							$tChargeDev[$iCurrentDate]=array();
+						}
+						if(!isset($tChargeDev[$iCurrentDate][$sDev])){
+							$tChargeDev[$iCurrentDate][$sDev]=0;
+						}
+						
+						
+						$tChargeDev[$iCurrentDate][$sDev]+=$iCharge;
+						
+					
 					endif;
 					
 					if($iTodayDate == $iCurrentDate){
@@ -219,7 +222,51 @@ ul.tabs a{
 			</tr>
 		<?php endforeach;?>
 	<?php endforeach;?>
+	
+	<tr>
+		<td></td>
+		<th>Total</th>
+		
+		
+		<?php $oCurrentDate=new plugin_date(date('Y-m-d'));?>
+		<?php $oCurrentDate->addDay($iStartDay);?>
+		<?php for($i=$iStartDay;$i<$iEndDay;$i++):?>
+		
+			
+			<?php
+			$style=null; 
+			$oCurrentDate->addDay(1);
+			$iCurrentDate=(int)$oCurrentDate->toString('Ymd');
+			
+			?>
+			
+			<td >
+				<?php if(isset($tChargeDev[$iCurrentDate])):?>
+				
+					<?php foreach($tChargeDev[$iCurrentDate] as $sDev => $iCharge):?>
+				
+						<a style="font-size:9px;<?php if($iCharge > 100):?>color:red<?php else:?>color:green<?php endif;?>" href="#" title="@<?php echo $sDev?> <?php echo $iCharge?>%"><?php echo strtoupper(substr($sDev,0,1))?></a><br/>
+						<?php if($iCharge > 100):?>
+							<?php if(!isset($tNbChargeDev[$sDev])){ $tNbChargeDev[$sDev]=0; }?>
+							<?php $tNbChargeDev[$sDev]+=1; ?>
+						<?php endif;?>
+					<?php endforeach;?>
+				
+				<?php endif;?>
+			</td>
+			
+			
+		<?php endfor;?>
+		
+	</tr>
 </table>
+
+
+<h2>Surcharge: (plus de 100%)</h2>
+<?php foreach($tNbChargeDev as $sDev => $iNb):?>
+<p><span style="color:darkgreen">@<?php echo $sDev?></span>: <?php echo $iNb?> jours</p>
+<?php endforeach;?>
+
 
 <?php if(_root::getParam('line',-1) > -1):?>
 </form>

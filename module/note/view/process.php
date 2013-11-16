@@ -14,7 +14,7 @@
 		<p style="color:gray"><?php echo $sLine?></p>
 	<?php elseif(substr($sLine,0,2)=='=='):?>
 		<?php if($bStart):?></p><?php endif;?>
-		<p style="font-weight:bold;border-bottom:1px solid black;margin-top:20px"><?php echo substr($sLine,2)?>
+		<p style="font-weight:bold;border-bottom:1px solid black;margin-top:20px"><?php echo $this->oModuleNote->format(substr($sLine,2))?>
 		<?php $bStart=1;?>
 	<?php elseif(substr($sLine,0,3)=='---' or substr($sLine,0,2)=='--' or substr($sLine,0,1)=='-'):?>
 		<?php if($bStart):?></p><?php endif;?>
@@ -37,12 +37,6 @@
 
 			?>"><?php
 			
-			if(isset($this->tMember)):
-				foreach($this->tMember as $sLogin):
-					$sText=preg_replace('/@'.$sLogin.'/','<span style="font-weight:bold;color:darkgreen">@'.$sLogin.'</span>',$sText);
-				endforeach;
-			endif;
-			
 
 			if($this->bWrite==1):
 				?><span style="float:right">
@@ -58,7 +52,7 @@
 				<?php
 			endif;
 			
-			echo $sText;
+			echo $this->oModuleNote->format($sText);
 			?>
 		<?php $bStart=1;?>
 	<?php else:?>

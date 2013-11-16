@@ -1,9 +1,19 @@
 <?php 
 class module_note extends abstract_module{
 	
+	protected $tMember;
+	protected $tLink;
+	protected $tHashtag;
+	protected $tLinkHashtag;
 	
 	public function before(){
 		$this->oLayout=new _layout('template1');
+		
+		$this->tMember=model_member::getInstance()->getSelect();
+		
+		define('startdate_enddate','startdate_enddate');
+		define('startdate_charge','startdate_charge');
+		define('hashtag_charge','hashtag_charge');
 		
 		//$this->oLayout->addModule('menu','menu::index');
 	}
@@ -20,14 +30,14 @@ class module_note extends abstract_module{
 	public function _admin(){
 		$this->oLayout=new _layout('template2');
 		
-		$tMember=model_member::getInstance()->getSelect();
+		
 		
 		$tNote=model_note::getInstance()->findAllAdmin();
 		
 		$tContent=array();
 		foreach($tNote as $oNote){
 			
-			if(!isset($tMember[$oNote->member_id])){
+			if(!isset($this->tMember[$oNote->member_id])){
 				continue;
 			}
 			
@@ -39,7 +49,7 @@ class module_note extends abstract_module{
 				
 				
 				if($sLine!='' ){
-					$sLine.=' @'.$tMember[$oNote->member_id];
+					$sLine.=' @'.$this->tMember[$oNote->member_id];
 				}
 				
 				$tContent[]=$sLine;
@@ -82,20 +92,6 @@ class module_note extends abstract_module{
 		}
 		
 		
-		$oView=new _view('note::admin');
-		$oView->tMember=$tMember;
-		$this->oLayout->add('main',$oView);
-
-		/*
-		$oView=new _view('note::process');
-		$oView->content=$sContent;
-		$oView->tMember=$tMember;
-		$oView->bWrite=0;*/
-		
-		
-		
-		//diagramm		
-		//$tProject=$tContent;
 		
 		$tMinMax=array();
 		$sKey=null;
@@ -108,15 +104,11 @@ class module_note extends abstract_module{
 			}elseif(substr($sLine,0,2)=='=='){
 				$sKey=substr($sLine,2);
 			}
-			if(preg_match('/\[([0-9\/-]*)\]/',$sLine)){
-				preg_match('/\[([0-9\/-]*)\]/',$sLine,$tMatchDate);
-				list($sStartDate,$sEndDate)=explode('-',$tMatchDate[1]);
-				
-				$oStartDate=new plugin_date($sStartDate,'d/m/Y');
-				$oEndDate=new plugin_date($sEndDate,'d/m/Y');
-				
-				$iStartDate=(int)$oStartDate->toString('Ymd');
-				$iEndDate=(int)$oEndDate->toString('Ymd');
+			
+			
+			list($iStartDate,$iEndDate)=$this->calculateListDate($sLine);
+			
+			if($iStartDate > 0){
 				
 				if(!isset($tMinMax[$sKey]['min']) or $tMinMax[$sKey]['min'] > $iStartDate){
 					$tMinMax[$sKey]['min']=$iStartDate;
@@ -127,15 +119,18 @@ class module_note extends abstract_module{
 				}
 				
 			}
+			
 		}
 		
 		plugin_debug::addSpy('tMinm',$tMinMax);
+		
+		plugin_debug::addSpy('tProject',$tProject);
 		
 		$oView=new _view('note::diagramadmin');
 		$oView->oNote=$oNote;
 		$oView->tProject=$tProject;
 		$oView->tMinMax=$tMinMax;
-		$oView->tMember=$tMember;
+		$oView->oModuleNote=$this;
 		
 		$this->oLayout->add('main',$oView);
 	}
@@ -144,12 +139,13 @@ class module_note extends abstract_module{
 		
 		$tNote=model_note::getInstance()->findAll();
 		
-		$oView=new _view('note::list');
-		$oView->tNote=$tNote;
+		if($tNote){
+			_root::redirect('note::show',array('id'=>$tNote[0]->id));
+		}else{
+			$this->_new();
+		}
 		
 		
-
-		$this->oLayout->add('main',$oView);
 	}
 	
 	
@@ -170,6 +166,7 @@ class module_note extends abstract_module{
 		$oView=new _view('note::process');
 		$oView->content=$sContent;
 		$oView->bWrite=$bWrite;
+		$oView->oModuleNote=$this;
 		
 		return $oView;
 	}
@@ -204,7 +201,11 @@ class module_note extends abstract_module{
 		$this->oLayout->add('main',$oView);
 	}
 
-	
+	public function _help(){
+		$oView=new _view('note::help');
+		
+		$this->oLayout->add('main',$oView);
+	}
 	
 	public function _show(){
 		$this->processSaveChecked();
@@ -254,6 +255,138 @@ class module_note extends abstract_module{
 		
 	}
 	
+	private function processCalculDate($sContent){
+		$tContent=preg_split('/\n/',$sContent);
+	
+		foreach($tContent as $i => $sLine){
+			if(preg_match('/#([a-zA-Z]*)/',$sLine) ){ 
+				preg_match('/#([a-zA-Z]*)/',$sLine,$tMatch);
+				
+				$sHashtag=$tMatch[1];
+				
+				$this->tHashtag[$sHashtag]['text']=$sLine;
+				$this->tHashtag[$sHashtag]['line']=$i;
+				
+				$this->processCalculDateForHashtag($sHashtag,$sLine);
+			
+			}
+			if(preg_match('/\[([a-zA-Z0-9;%]*)\]/',$sLine)){
+				preg_match('/\[([a-zA-Z0-9;%]*)\]/',$sLine,$tMatchDate);
+
+				$iAffect=1;
+				$tData=explode(';',$tMatchDate[1]);
+				if(isset($tData[2])){
+					$sAffect=str_replace('%','',$tData[2]);
+					$iAffect=($sAffect/100);
+				}
+				
+				$sHashtag=$tData[0];
+				
+				$this->tLinkHashtag[ $this->tLink[$sHashtag] ]['from']=$this->tHashtag[$sHashtag]['line'];
+				$this->tLinkHashtag[ $this->tLink[$sHashtag] ]['to']=$i;
+				
+			}
+			
+		}
+		
+		
+	
+	}
+	private function processCalculDateForHashtag($sHashtag){
+		list($iStartDate,$iEndDate,$sEndDate)=$this->getListDate($this->tHashtag[$sHashtag]['text']);
+		$this->tHashtag[$sHashtag]['startdate']=$iStartDate;
+		$this->tHashtag[$sHashtag]['enddate']=$iEndDate;
+		
+		$this->tLink[$sHashtag]=$sEndDate;
+	}
+	
+	private function getListDate($sProject){
+		$iStartDate=0;
+		$iEndDate=0;
+		$sEndDate=null;
+		if(preg_match('/\[([0-9\/-]*)\]/',$sProject)){
+			preg_match('/\[([0-9\/-]*)\]/',$sProject,$tMatchDate);
+			list($sStartDate,$sEndDate)=explode('-',$tMatchDate[1]);
+			
+			$oStartDate=new plugin_date($sStartDate,'d/m/Y');
+			$oEndDate=new plugin_date($sEndDate,'d/m/Y');
+			
+			$iStartDate=(int)$oStartDate->toString('Ymd');
+			$iEndDate=(int)$oEndDate->toString('Ymd');
+			
+			$sEndDate=$oEndDate->toString('d/m/Y');
+		}elseif(preg_match('/\[([0-9\/;%]*)\]/',$sProject)){
+			preg_match('/\[([0-9\/;%]*)\]/',$sProject,$tMatchDate);
+			
+			$iAffect=1;
+			$tData=explode(';',$tMatchDate[1]);
+			if(isset($tData[2])){
+				$sAffect=str_replace('%','',$tData[2]);
+				$iAffect=($sAffect/100);
+			}
+			
+			$sStartDate=$tData[0];
+			$iCharge=$tData[1];
+						
+			$iCharge=ceil( ($iCharge-1)/$iAffect);
+			
+			$oStartDate=new plugin_date($sStartDate,'d/m/Y');
+			$oEndDate=clone $oStartDate;
+			$i=0;
+			while($i<$iCharge){
+				$oEndDate->addDay(1);
+				if($oEndDate->getWeekDay()!=6 and $oEndDate->getWeekDay()!=0){
+					$i++;
+				}
+			}
+			
+			$iStartDate=(int)$oStartDate->toString('Ymd');
+			$iEndDate=(int)$oEndDate->toString('Ymd');
+			
+			$sEndDate=$oEndDate->toString('d/m/Y');
+		
+		}elseif(preg_match('/\[([a-zA-Z0-9;%]*)\]/',$sProject)){
+			preg_match('/\[([a-zA-Z0-9;%]*)\]/',$sProject,$tMatchDate);
+			
+			$iAffect=1;
+			$tData=explode(';',$tMatchDate[1]);
+			if(isset($tData[2])){
+				$sAffect=str_replace('%','',$tData[2]);
+				$iAffect=($sAffect/100);
+			}
+			
+			$sHashtag=$tData[0];
+			
+			if(!isset($this->tLink[$sHashtag])){
+				$this->processCalculDateForHashtag($sHashtag);
+			}
+			
+			$sStartDate=$this->tLink[$sHashtag];
+			$iCharge=$tData[1];
+			
+			$iCharge=ceil( ($iCharge-1)/$iAffect);
+			
+			$oStartDate=new plugin_date($sStartDate,'d/m/Y');
+			$oStartDate->addDay(1);
+			$oEndDate=clone $oStartDate;
+			$i=0;
+			while($i<$iCharge){
+				$oEndDate->addDay(1);
+				if($oEndDate->getWeekDay()!=6 and $oEndDate->getWeekDay()!=0){
+					$i++;
+				}
+			}
+			
+			$iStartDate=(int)$oStartDate->toString('Ymd');
+			$iEndDate=(int)$oEndDate->toString('Ymd');
+			
+			$sEndDate=$oEndDate->toString('d/m/Y');
+		}
+		return array($iStartDate,$iEndDate,$sEndDate);
+	}
+	
+	
+	
 	public function _diagram(){
 		$this->processDiagram();
 		
@@ -263,21 +396,18 @@ class module_note extends abstract_module{
 		
 		$tProject=$oNote->findListProject();
 		
+		$this->processCalculDate($oNote->content);
+		
 		$tMinMax=array();
 		$sKey=null;
 		foreach($tProject as $sLine){
 			if(substr($sLine,0,2)=='=='){
 				$sKey=substr($sLine,2);
 			}
-			if(preg_match('/\[([0-9\/-]*)\]/',$sLine)){
-				preg_match('/\[([0-9\/-]*)\]/',$sLine,$tMatchDate);
-				list($sStartDate,$sEndDate)=explode('-',$tMatchDate[1]);
-				
-				$oStartDate=new plugin_date($sStartDate,'d/m/Y');
-				$oEndDate=new plugin_date($sEndDate,'d/m/Y');
-				
-				$iStartDate=(int)$oStartDate->toString('Ymd');
-				$iEndDate=(int)$oEndDate->toString('Ymd');
+			
+			list($iStartDate,$iEndDate)=$this->calculateListDate($sLine);
+			
+			if($iStartDate > 0){
 				
 				if(!isset($tMinMax[$sKey]['min']) or $tMinMax[$sKey]['min'] > $iStartDate){
 					$tMinMax[$sKey]['min']=$iStartDate;
@@ -290,12 +420,14 @@ class module_note extends abstract_module{
 			}
 		}
 		
-		plugin_debug::addSpy('tMinm',$tMinMax);
+		plugin_debug::addSpy('tLinkHashtag',$this->tLinkHashtag);
 		
 		$oView=new _view('note::diagram');
 		$oView->oNote=$oNote;
 		$oView->tProject=$tProject;
 		$oView->tMinMax=$tMinMax;
+		$oView->oModuleNote=$this;
+		$oView->tLinkHashtag=$this->tLinkHashtag;
 		
 		$this->oLayout->add('main',$oView);
 	}
@@ -310,6 +442,8 @@ class module_note extends abstract_module{
 		$this->oLayout->add('main',$oView);
 	}
 	
+	
+	
 	private function processDiagram(){
 		if(!_root::getRequest()->isPost() ){ //si ce n'est pas une requete POST on ne soumet pas
 			return null;
@@ -317,16 +451,48 @@ class module_note extends abstract_module{
 		
 		$oNote=model_note::getInstance()->findById( _root::getParam('id',null) );
 		
-		$tDate=_root::getParam('tDate');
-		$sMaxDate=$tDate[ count($tDate)-1 ];
+		$sAction=_root::getParam('action');
 		
 		$tNote= explode("\n",$oNote->content);
+		
+		if($sAction==startdate_enddate){
+			$tDate=_root::getParam('tDate');
+			$sMaxDate=$tDate[ count($tDate)-1 ];
+		}else if($sAction == startdate_charge){
+			$sDate=_root::getParam('sDate');
+			$iCharge=_root::getParam('charge');
+			$iAffectation=_root::getParam('affectation');
+		}else if($sAction == hashtag_charge){
+			$sHashtag=_root::getParam('hashtag');
+			$iCharge=_root::getParam('charge');
+			$iAffectation=_root::getParam('affectation');
+			$ihashtag_line=_root::getParam('hashtag_line');
+			
+			foreach($tNote as $i => $sLine){
+				if($i == $ihashtag_line){
+					if(!preg_match('/#'.$sHashtag.'/',$sLine)){
+						$sLine.=' #'.$sHashtag;
+					}
+				}
+				$tNote[$i]=$sLine;
+			}
+		}
+		
 		//plugin_debug::addSpy('tNote',$tNote);
 		foreach($tNote as $i => $sLine){
 			if($i == _root::getParam('line')){
 				
-				$sLine=preg_replace('/\[([0-9\/-]*)\]/','',$sLine);
-				$sLine.= ' ['.$tDate[0].'-'.$sMaxDate.']';
+				if($sAction==startdate_enddate){
+					$sLine=preg_replace('/\[([0-9\/-]*)\]/','',$sLine);
+					$sLine.= ' ['.$tDate[0].'-'.$sMaxDate.']';
+				}else if($sAction==startdate_charge){
+					$sLine=preg_replace('/\[([0-9\/;%]*)\]/','',$sLine);
+					$sLine.= ' ['.$sDate.';'.$iCharge.';'.$iAffectation.'%]';
+				}else if($sAction==hashtag_charge){
+					$sLine=preg_replace('/\[([a-zA-Z0-9\/;%]*)\]/','',$sLine);
+					$sLine.= ' ['.$sHashtag.';'.$iCharge.';'.$iAffectation.'%]';
+				}
+				
 			}
 			$tNote[$i]=$sLine;
 			
@@ -386,7 +552,44 @@ class module_note extends abstract_module{
 	}
 	
 	
+	public function _adminEditByMember(){
+			
+		$tNote=model_note::getInstance()->findAllByMember(_root::getParam('member_id'));
 	
+		if($tNote){
+			_root::redirect('note::adminEdit',array('id'=>$tNote[0]->id));
+		}
+		
+	}
+	public function _adminEdit(){
+		$this->oLayout=new _layout('template2');
+		
+		$tMessage=$this->processAdminSave();
+		
+		$oNote=model_note::getInstance()->findById( _root::getParam('id') );
+		
+		$sContent=null;
+		$tContent=explode("\n",$oNote->content);
+		foreach($tContent as $sLine){
+			if(substr($sLine,0,3)=='==='){
+				break;
+			}
+			
+			$sContent.=$sLine."\n";
+		}
+		
+		$oView=new _view('note::edit');
+		$oView->oNote=$oNote;
+		$oView->content=$sContent;
+		$oView->tId=model_note::getInstance()->getIdTab();
+		
+		
+		$oPluginXsrf=new plugin_xsrf();
+		$oView->token=$oPluginXsrf->getToken();
+		$oView->tMessage=$tMessage;
+		
+		$this->oLayout->add('main',$oView);
+	}
 	
 
 	public function processSave(){
@@ -434,7 +637,223 @@ class module_note extends abstract_module{
 		}
 		
 	}
+	public function processAdminSave(){
+		if(!_root::getRequest()->isPost() ){ //si ce n'est pas une requete POST on ne soumet pas
+			return null;
+		}
+		
+		$oPluginXsrf=new plugin_xsrf();
+		if(!$oPluginXsrf->checkToken( _root::getParam('token') ) ){ //on verifie que le token est valide
+			return array('token'=>$oPluginXsrf->getMessage() );
+		}
 	
+		$iId=_root::getParam('id',null);
+		if($iId==null){
+			$oNote=new row_note;	
+		}else{
+			$oNote=model_note::getInstance()->findById( _root::getParam('id',null) );
+		}
+		
+		
+		$tArchiveContent=array();
+		$bArchive=0;
+		$tNote= explode("\n",$oNote->content);
+		foreach($tNote as $i => $sLine){
+			if(substr($sLine,0,3)=='==='){
+				$bArchive=1;
+			}
+			
+			if($bArchive){
+				$tArchiveContent[]=$sLine;
+			}
+		}
+		
+		$oNote->content=_root::getParam('content')."\n".implode("\n",$tArchiveContent);
+		
+		
+		
+		if($oNote->save()){
+			//une fois enregistre on redirige (vers la page liste)
+			
+			
+			_root::redirect('note::admin');
+		}else{
+			return $oNote->getListError();
+		}
+		
+	}
+	
+	
+	//------------------- TOOLS
+	
+	public function format($sProject){
+		foreach($this->tMember as $member_id => $sLogin){
+			$sProject=preg_replace('/@'.$sLogin.'/','<a target="_blank" href="'._root::getLink('note::adminEditByMember',array('member_id'=>$member_id)).'" style=";color:darkgreen">@'.$sLogin.'</span>',$sProject);
+		}
+		if(preg_match('/#([a-zA-Z]+)/',$sProject)){
+			preg_match('/#([a-zA-Z]*)/',$sProject,$tMatch);
+			$sProject=str_replace('#'.$tMatch[1],'<span style="color:darkred">'.'#'.$tMatch[1].'</span>',$sProject);
+		}
+		
+		
+		if(preg_match('/\[([0-9\/-]*)\]/',$sProject)){
+			preg_match('/\[([0-9\/\-]*)\]/',$sProject,$tMatchDate);
+			$sProject=str_replace($tMatchDate[1],'<span style="color:#4a909a;font-weight:bold">'.str_replace('-',' au ',$tMatchDate[1]).'</span>',$sProject);
+		}elseif(preg_match('/\[([0-9\/;%]*)\]/',$sProject)){
+			preg_match('/\[([0-9\/;%]*)\]/',$sProject,$tMatchDate);
+			
+			$iAffect=1;
+			$tData=explode(';',$tMatchDate[1]);
+			if(isset($tData[2])){
+				$sAffect=str_replace('%','',$tData[2]);
+				$iAffect=$sAffect/100;
+			}			
+			
+			$sStartDate=$tData[0];
+			$iCharge=$tData[1];
+			
+			$sProject=str_replace($tMatchDate[1],'<span style="color:#4a909a;font-weight:bold">'.$sStartDate.' &nbsp;  '.$iCharge.' jour &nbsp; '.($iAffect*100).'%</span>',$sProject);
+			
+		}elseif(preg_match('/\[([a-zA-Z0-9;%]*)\]/',$sProject)){
+			preg_match('/\[([a-zA-Z0-9;%]*)\]/',$sProject,$tMatchDate);
+			
+			$iAffect=1;
+			$tData=explode(';',$tMatchDate[1]);
+			if(isset($tData[2])){
+				$sAffect=str_replace('%','',$tData[2]);
+				$iAffect=($sAffect/100);
+			}
+			
+			$sHashtag=$tData[0];
+			
+			$sStartDate=$this->tLink[$sHashtag];
+			$iCharge=$tData[1];
+				
+			$sProject=str_replace($tMatchDate[1],'<span style="color:darkred">#'.$sHashtag.'</span><span style="color:#4a909a;font-weight:bold"> &nbsp;  '.$iCharge.' jour &nbsp; '.($iAffect*100).'%</span>',$sProject);
+		}
+		
+		$sProject=str_replace('OK','<span style="font-weight:bold;background:#66c673;color:white">OK</span>',$sProject);
+		
+		
+		
+		return $sProject;
+		
+	}
+	
+	public function calculateListDate($sProject){
+		$iStartDate=0;
+		$iEndDate=0;
+		$sEndDate=null;
+		if(preg_match('/\[([0-9\/-]*)\]/',$sProject)){
+			preg_match('/\[([0-9\/-]*)\]/',$sProject,$tMatchDate);
+			list($sStartDate,$sEndDate)=explode('-',$tMatchDate[1]);
+			plugin_debug::addSpy('sStartDate',$sStartDate);
+			plugin_debug::addSpy('sEndDate',$sEndDate);
+			
+			$oStartDate=new plugin_date($sStartDate,'d/m/Y');
+			$oEndDate=new plugin_date($sEndDate,'d/m/Y');
+			
+			$iStartDate=(int)$oStartDate->toString('Ymd');
+			$iEndDate=(int)$oEndDate->toString('Ymd');
+			
+			$sEndDate=$oEndDate->toString('d/m/Y');
+		}elseif(preg_match('/\[([0-9\/;%]*)\]/',$sProject)){
+			preg_match('/\[([0-9\/;%]*)\]/',$sProject,$tMatchDate);
+			
+			$iAffect=1;
+			$tData=explode(';',$tMatchDate[1]);
+			if(isset($tData[2])){
+				$sAffect=str_replace('%','',$tData[2]);
+				$iAffect=($sAffect/100);
+			}
+			
+			
+			$sStartDate=$tData[0];
+			$iCharge=$tData[1];
+			
+			plugin_debug::addSpy('sStartDate',$sStartDate);
+			
+			$iCharge=ceil( ($iCharge-1)/$iAffect);
+			
+			$oStartDate=new plugin_date($sStartDate,'d/m/Y');
+			$oEndDate=clone $oStartDate;
+			$i=0;
+			while($i<$iCharge){
+				$oEndDate->addDay(1);
+				if($oEndDate->getWeekDay()!=6 and $oEndDate->getWeekDay()!=0){
+					$i++;
+				}
+			}
+			
+			$iStartDate=(int)$oStartDate->toString('Ymd');
+			$iEndDate=(int)$oEndDate->toString('Ymd');
+			
+			$sEndDate=$oEndDate->toString('d/m/Y');
+		
+		}elseif(preg_match('/\[([a-zA-Z0-9;%]*)\]/',$sProject)){
+			preg_match('/\[([a-zA-Z0-9;%]*)\]/',$sProject,$tMatchDate);
+			
+			$iAffect=1;
+			$tData=explode(';',$tMatchDate[1]);
+			if(isset($tData[2])){
+				$sAffect=str_replace('%','',$tData[2]);
+				$iAffect=($sAffect/100);
+			}
+			
+			$sHashtag=$tData[0];
+			
+			$sStartDate=$this->tLink[$sHashtag];
+			$iCharge=$tData[1];
+			
+			plugin_debug::addSpy('sStartDate',$sStartDate);
+			
+			$iCharge=ceil( ($iCharge-1)/$iAffect);
+			
+			$oStartDate=new plugin_date($sStartDate,'d/m/Y');
+			$oStartDate->addDay(1);
+			$oEndDate=clone $oStartDate;
+			$i=0;
+			while($i<$iCharge){
+				$oEndDate->addDay(1);
+				if($oEndDate->getWeekDay()!=6 and $oEndDate->getWeekDay()!=0){
+					$i++;
+				}
+			}
+			
+			$iStartDate=(int)$oStartDate->toString('Ymd');
+			$iEndDate=(int)$oEndDate->toString('Ymd');
+		}
+		
+		if(preg_match('/#([a-zA-Z]*)/',$sProject) and $sEndDate){
+			
+			preg_match('/#([a-zA-Z]*)/',$sProject,$tMatch);
+			
+			$sHashtag=$tMatch[1];
+			$this->tLink[$sHashtag]=$sEndDate;
+			
+			plugin_debug::addSpy('tl',$this->tLink);
+			
+		}
+		
+		
+		return array($iStartDate,$iEndDate);
+	}
+	
+	public function calculCharge($sProject){
+		$iCharge=100;
+		if(preg_match('/([0-9]*)%\]/',$sProject)){
+			preg_match('/([0-9]*)%\]/',$sProject,$tMatch);
+			
+			$iCharge=(int)$tMatch[1];
+		}
+		return $iCharge;
+	}
+	public function getDev($sProject){
+		if(preg_match('/@([a-zA-Z]*)/',$sProject)){
+			preg_match('/@([a-zA-Z]*)/',$sProject,$tMatch);
+			return $tMatch[1];
+		}
+	}
 	
 
 	

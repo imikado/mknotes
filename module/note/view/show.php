@@ -42,6 +42,12 @@ function editLine(i){
 	
 	
 }
+function closePopup2(){
+	var c=getById('popupUpdateLine');
+	if(c){
+		c.style.display='none';
+	}
+}
 </script>
 <style>
 .popup{
@@ -49,6 +55,15 @@ function editLine(i){
 	background:white;
 	position:absolute;
 	display:none;
+	top:100px;
+	}
+	.popup p.close{
+		text-align:right;
+		margin-top:0px;
+		background:black;
+	}
+	.popup p.close a{
+		color:white;
 	}
 ul.tabs li{
 display:inline;
@@ -72,6 +87,10 @@ ul.tabs a{
 	<li class="selected"><a href="<?php echo _root::getLink('note::show',array('id'=>$this->oNote->id))?>">Current</a></li>
 	<li><a href="<?php echo _root::getLink('note::history',array('id'=>$this->oNote->id))?>">Snapshots</a></li>
 	<li><a href="<?php echo _root::getLink('note::diagram',array('id'=>$this->oNote->id))?>">Planning</a></li>
+	
+	<?php if(_root::getAuth() and _root::getAuth()->getAccount() and _root::getAuth()->getAccount()->admin):?>
+		<li><a href="<?php echo _root::getLink('note::admin')?>">Planning g&eacute;n&eacute;ral</a> </li>
+	<?php endif;?> 
 </ul>
 
 <?php echo $this->oViewProcessed->show()?>
@@ -88,6 +107,7 @@ ul.tabs a{
 </form>
 
 <div class="popup" id="popupUpdateLine">
+	<p class="close"><a href="#" onclick="closePopup2()">Fermer</a></p>
 <form action="" method="POST" id="formUpdateLine">
 <input type="hidden" name="type" value="updateLine"/>
 <input type="hidden" name="line" value="" id="inputUpdateLine"/>

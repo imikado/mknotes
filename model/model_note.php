@@ -18,6 +18,9 @@ class model_note extends abstract_model{
 	public function findAll(){
 		return $this->findMany('SELECT * FROM '.$this->sTable.' WHERE member_id=?',_root::getAuth()->getAccount()->id);
 	}
+	public function findAllByMember($member_id){
+		return $this->findMany('SELECT * FROM '.$this->sTable.' WHERE member_id=?',$member_id);
+	}
 	
 	public function findAllAdmin(){
 		return $this->findMany('SELECT * FROM '.$this->sTable.' ');
@@ -140,7 +143,9 @@ class row_note extends abstract_row{
 		if(!$this->isValid()){
 			return false;
 		}
-		$this->member_id=_root::getAuth()->getAccount()->id;
+		if($this->member_id==''){
+			$this->member_id=_root::getAuth()->getAccount()->id;
+		}
 		parent::save();
 		return true;
 	}

@@ -10,11 +10,9 @@
 
 <div class="main" style="width:1300px">
 	<p>
-		<a href="<?php echo _root::getLink('note::index')?>">Liste notes</a> | 
+		<a href="<?php echo _root::getLink('note::index')?>">Accueil</a> | 
 		
-		<?php if(_root::getAuth() and _root::getAuth()->getAccount() and _root::getAuth()->getAccount()->admin):?>
-			<a href="<?php echo _root::getLink('note::admin')?>">Admin multi-notes</a> | 
-		<?php endif;?> 
+		<a href="<?php echo _root::getLink('note::help')?>">Aide</a> | 
 		
 		<a href="<?php echo _root::getLink('auth::logout')?>">Logout</a> 
 	
