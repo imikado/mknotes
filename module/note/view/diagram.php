@@ -275,7 +275,7 @@ ul.tabs a{
 				}
 				
 				$sJalonBurned=null;
-				if($sClass=='taskOn' and $sJalon!='' and isset($this->tHashtag[$sJalon]) and $iCurrentDate > $this->tHashtag[$sJalon]['enddate'] ){
+				if($sClass=='taskOn' and $sJalon!='' and isset($this->tHashtag[$sJalon]) and $iCurrentDate >= $this->tHashtag[$sJalon]['startdate'] ){
 					
 					$sJalonBurned=';background:red';
 				}
