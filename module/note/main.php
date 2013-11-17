@@ -71,8 +71,8 @@ class module_note extends abstract_module{
 		foreach($tContent as $sLine){
 			if(trim($sLine)=='') continue;
 			
-			if(substr($sLine,0,2)=='==' and preg_match('/#([a-zA-Z]*)/',$sLine)){
-				preg_match('/#([a-zA-Z]*)/',$sLine,$tMatch);
+			if(substr($sLine,0,2)=='==' and preg_match('/#([a-zA-Z]+)/',$sLine)){
+				preg_match('/#([a-zA-Z]+)/',$sLine,$tMatch);
 				
 				$sHashtag=$tMatch[1];
 				$sProject=null;
@@ -97,14 +97,12 @@ class module_note extends abstract_module{
 			
 		}
 		
-		
-		
 		$tMinMax=array();
 		$sKey=null;
 		
 		foreach($tContent as $sLine){
-			if(substr($sLine,0,2)=='==' and preg_match('/#([a-zA-Z]*)/',$sLine)){
-				preg_match('/#([a-zA-Z]*)/',$sLine,$tMatch);
+			if(substr($sLine,0,2)=='==' and preg_match('/#([a-zA-Z]+)/',$sLine)){
+				preg_match('/#([a-zA-Z]+)/',$sLine,$tMatch);
 				
 				$sKey=$tMatch[1];
 			}elseif(substr($sLine,0,2)=='=='){
@@ -128,15 +126,24 @@ class module_note extends abstract_module{
 			
 		}
 		
-		plugin_debug::addSpy('tMinm',$tMinMax);
+		//----content
+		$tContent=array();
+		foreach($tProject as  $sProject0 => $tTask){
+			foreach($tTask as $sLine){
+				$tContent[]=$sLine;
+			}
+		}
 		
-		plugin_debug::addSpy('tProject',$tProject);
+		$this->processCalculDate($tContent);
+		plugin_debug::addSpy('tLinkHashtag',$this->tLinkHashtag);
 		
 		$oView=new _view('note::diagramadmin');
 		$oView->oNote=$oNote;
-		$oView->tProject=$tProject;
+		$oView->tProject=$tContent;
 		$oView->tMinMax=$tMinMax;
 		$oView->oModuleNote=$this;
+		$oView->tLinkHashtag=$this->tLinkHashtag;
+		$oView->tHashtag=$this->tHashtag;
 		
 		$this->oLayout->add('main',$oView);
 	}
@@ -234,6 +241,7 @@ class module_note extends abstract_module{
 		
 		$oView=new _view('note::history');
 		$oView->oNote=$oNote;
+		$oView->oModuleNote=$this;
 		
 		$this->oLayout->add('main',$oView);
 	}
@@ -261,8 +269,8 @@ class module_note extends abstract_module{
 		
 	}
 	
-	private function processCalculDate($sContent){
-		$tContent=preg_split('/\n/',$sContent);
+	private function processCalculDate($tContent){
+		//$tContent=preg_split('/\n/',$sContent);
 	
 		foreach($tContent as $i => $sLine){
 			if(preg_match('/#([a-zA-Z]+)/',$sLine) ){ 
@@ -287,6 +295,10 @@ class module_note extends abstract_module{
 				}
 				
 				$sHashtag=$tData[0];
+				
+				if(!isset($this->tLink[$sHashtag])){
+					$this->processCalculDateForHashtag($sHashtag);
+				}
 				
 				$this->tLinkHashtag[ $this->tLink[$sHashtag] ]['from']=$this->tHashtag[$sHashtag]['line'];
 				$this->tLinkHashtag[ $this->tLink[$sHashtag] ]['to']=$i;
@@ -404,7 +416,7 @@ class module_note extends abstract_module{
 		
 		$tProject=$oNote->findListProject();
 		
-		$this->processCalculDate($oNote->content);
+		
 		
 		$tMinMax=array();
 		$sKey=null;
@@ -427,6 +439,8 @@ class module_note extends abstract_module{
 				
 			}
 		}
+		
+		$this->processCalculDate($tProject);
 		
 		plugin_debug::addSpy('tLinkHashtag',$this->tLinkHashtag);
 		
@@ -747,8 +761,8 @@ class module_note extends abstract_module{
 			$sProject=str_replace($tMatchDate[1],'<span style="color:darkred">#'.$sHashtag.'</span><span style="color:#4a909a;font-weight:bold"> &nbsp;  '.$iCharge.' jour &nbsp; '.($iAffect*100).'%</span>',$sProject);
 		}
 		
-		$sProject=str_replace('OK','<span style="font-weight:bold;background:#66c673;color:white">OK</span>',$sProject);
-		
+		$sProject=str_replace(' OK',' <span style="font-weight:bold;background:#66c673;color:white">OK</span>',$sProject);
+		$sProject=str_replace(' RUN',' <span style="font-weight:bold;background:orange;color:white">RUN</span>',$sProject);
 		
 		
 		return $sProject;

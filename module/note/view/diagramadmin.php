@@ -120,19 +120,14 @@ ul.tabs a{
 	</tr>
 	
 	
-	<?php foreach($this->tProject as  $sProject0 => $tTask):?>
-	
-		<tr>
-			<td style="font-size:2px">a&nbsp;</td>
-		</tr>
-	
-		<?php foreach($tTask as $sProject):?>
+	<?php foreach($this->tProject as $iLine => $sProject):?>
 			<?php 
 			//$sProject0=substr($sProject0,2);
 			
 			list($iStartDate,$iEndDate)=$this->oModuleNote->calculateListDate($sProject);
 			$iCharge=$this->oModuleNote->calculCharge($sProject);
 			$sDev=$this->oModuleNote->getDev($sProject);
+			$sJalon=$this->oModuleNote->getJalon($sProject);
 			
 			$bEdit=0;
 		
@@ -175,7 +170,6 @@ ul.tabs a{
 					$oCurrentDate->addDay(1);
 					$iCurrentDate=(int)$oCurrentDate->toString('Ymd');
 					$sInputCurrentDate=$oCurrentDate->toString('d/m/Y');
-					
 					if($oCurrentDate->toString('w') == 6 or $oCurrentDate->toString('w') == 0):
 						$sClass='weekend';
 					elseif($iStartDate <= $iCurrentDate and $iEndDate >= $iCurrentDate ):
@@ -190,8 +184,6 @@ ul.tabs a{
 						
 						
 						$tChargeDev[$iCurrentDate][$sDev]+=$iCharge;
-						
-					
 					endif;
 					
 					if($iTodayDate == $iCurrentDate){
@@ -199,8 +191,19 @@ ul.tabs a{
 					}
 					
 					$accolade=null;
-					if($bProject and isset($this->tMinMax[$sProject0]) and $this->tMinMax[$sProject0]['min'] <= $iCurrentDate and $this->tMinMax[$sProject0]['max'] >= $iCurrentDate ){
+					if(isset($this->tMinMax[$sProject]) and $this->tMinMax[$sProject]['min'] <= $iCurrentDate and $this->tMinMax[$sProject]['max'] >= $iCurrentDate ){
 						$accolade=';border-top:4px solid #043f70';
+					}
+					
+					$sLink=null;
+					if(isset($this->tLinkHashtag[$sInputCurrentDate]) and $iLine >= $this->tLinkHashtag[$sInputCurrentDate]['from'] and $iLine <= $this->tLinkHashtag[$sInputCurrentDate]['to']   ){
+						$sLink=';border-right:2px dotted black';
+					}
+					
+					$sJalonBurned=null;
+					if($sClass=='taskOn' and $sJalon!='' and isset($this->tHashtag[$sJalon]) and $iCurrentDate >= $this->tHashtag[$sJalon]['startdate'] ){
+						
+						$sJalonBurned=';background:red';
 					}
 					
 					?>
@@ -209,7 +212,7 @@ ul.tabs a{
 				
 					
 				
-					<td class="<?php echo $sClass?>" style="font-size:8px;border:<?php echo $border?>px solid darkred<?php echo $accolade?>">
+					<td class="<?php echo $sClass?>" style="font-size:8px;border:<?php echo $border?>px solid darkred<?php echo $accolade?><?php echo $sLink?><?php echo $sJalonBurned?>">
 						&nbsp;
 					</td>
 					
@@ -220,7 +223,7 @@ ul.tabs a{
 				
 				
 			</tr>
-		<?php endforeach;?>
+		
 	<?php endforeach;?>
 	
 	<tr>

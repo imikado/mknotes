@@ -114,11 +114,13 @@ ul.tabs a{
 			if(preg_match('/'.module_note::getOk().'/',$sLine)):
 				?>;background:#66c673<?php
 				$bOk=1;
+			elseif(preg_match('/'.module_note::getRun().'/',$sLine)):
+				?>;background:orange<?php
 			endif;
 
 			?>"><?php
 			
-			echo $sText;
+			echo $this->oModuleNote->format($sText);
 			?>
 		<?php $bStart=1;?>
 	<?php else:?>
