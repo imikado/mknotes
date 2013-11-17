@@ -14,6 +14,35 @@ function preview(){
 	}
 }
 </script>
+<style>
+ul.tabs li{
+display:inline;
+border:1px solid gray;
+padding:0px 6px;
+background:#ddd;
+}
+ul.tabs {
+	border-bottom:1px solid gray;
+}
+ul.tabs li.selected{
+	border-bottom:1px solid white;
+	background:white;
+}
+ul.tabs a{
+	text-decoration:none;
+}
+</style>
+
+<ul class="tabs">
+	<li class="selected"><a href="<?php echo _root::getLink('note::show',array('id'=>$this->oNote->id))?>">Current</a></li>
+	<li><a href="<?php echo _root::getLink('note::history',array('id'=>$this->oNote->id))?>">Snapshots</a></li>
+	<li><a href="<?php echo _root::getLink('note::diagram',array('id'=>$this->oNote->id))?>">Planning</a></li>
+	
+	<?php if(_root::getAuth() and _root::getAuth()->getAccount() and _root::getAuth()->getAccount()->admin):?>
+		<li><a href="<?php echo _root::getLink('note::admin')?>">Planning g&eacute;n&eacute;ral</a> </li>
+	<?php endif;?> 
+</ul>
+
 <table>
 
 <tr>

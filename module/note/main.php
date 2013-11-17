@@ -296,13 +296,14 @@ class module_note extends abstract_module{
 				
 				$sHashtag=$tData[0];
 				
-				if(!isset($this->tLink[$sHashtag])){
-					$this->processCalculDateForHashtag($sHashtag);
+				if($sHashtag!=''){
+					if(!isset($this->tLink[$sHashtag])){
+						$this->processCalculDateForHashtag($sHashtag);
+					}
+				
+					$this->tLinkHashtag[ $this->tLink[$sHashtag] ]['from']=$this->tHashtag[$sHashtag]['line'];
+					$this->tLinkHashtag[ $this->tLink[$sHashtag] ]['to']=$i;
 				}
-				
-				$this->tLinkHashtag[ $this->tLink[$sHashtag] ]['from']=$this->tHashtag[$sHashtag]['line'];
-				$this->tLinkHashtag[ $this->tLink[$sHashtag] ]['to']=$i;
-				
 			}
 			
 		}
@@ -582,40 +583,10 @@ class module_note extends abstract_module{
 		$tNote=model_note::getInstance()->findAllByMember(_root::getParam('member_id'));
 	
 		if($tNote){
-			_root::redirect('note::adminEdit',array('id'=>$tNote[0]->id));
+			_root::redirect('note::edit',array('id'=>$tNote[0]->id));
 		}
 		
 	}
-	public function _adminEdit(){
-		$this->oLayout=new _layout('template2');
-		
-		$tMessage=$this->processAdminSave();
-		
-		$oNote=model_note::getInstance()->findById( _root::getParam('id') );
-		
-		$sContent=null;
-		$tContent=explode("\n",$oNote->content);
-		foreach($tContent as $sLine){
-			if(substr($sLine,0,3)=='==='){
-				break;
-			}
-			
-			$sContent.=$sLine."\n";
-		}
-		
-		$oView=new _view('note::edit');
-		$oView->oNote=$oNote;
-		$oView->content=$sContent;
-		$oView->tId=model_note::getInstance()->getIdTab();
-		
-		
-		$oPluginXsrf=new plugin_xsrf();
-		$oView->token=$oPluginXsrf->getToken();
-		$oView->tMessage=$tMessage;
-		
-		$this->oLayout->add('main',$oView);
-	}
-	
 
 	public function processSave(){
 		if(!_root::getRequest()->isPost() ){ //si ce n'est pas une requete POST on ne soumet pas
