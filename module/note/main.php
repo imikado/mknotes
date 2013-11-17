@@ -5,6 +5,7 @@ class module_note extends abstract_module{
 	protected $tLink;
 	protected $tHashtag;
 	protected $tLinkHashtag;
+	protected $oMember;
 	
 	public function before(){
 		$this->oLayout=new _layout('template1');
@@ -14,6 +15,8 @@ class module_note extends abstract_module{
 		define('startdate_enddate','startdate_enddate');
 		define('startdate_charge','startdate_charge');
 		define('hashtag_charge','hashtag_charge');
+		
+		$this->oMember=_root::getAuth()->getAccount();
 		
 		//$this->oLayout->addModule('menu','menu::index');
 	}
@@ -703,6 +706,9 @@ class module_note extends abstract_module{
 			preg_match('/\[([0-9\/;%]*)\]/',$sProject,$tMatchDate);
 			
 			$iAffect=1;
+			if($this->oMember->defaultAffectation){
+				$iAffect=$this->oMember->defaultAffectation/100;
+			}
 			$tData=explode(';',$tMatchDate[1]);
 			if(isset($tData[2])){
 				$sAffect=str_replace('%','',$tData[2]);
@@ -718,6 +724,9 @@ class module_note extends abstract_module{
 			preg_match('/\[([a-zA-Z0-9;%]*)\]/',$sProject,$tMatchDate);
 			
 			$iAffect=1;
+			if($this->oMember->defaultAffectation){
+				$iAffect=$this->oMember->defaultAffectation/100;
+			}
 			$tData=explode(';',$tMatchDate[1]);
 			if(isset($tData[2])){
 				$sAffect=str_replace('%','',$tData[2]);
@@ -761,6 +770,9 @@ class module_note extends abstract_module{
 			preg_match('/\[([0-9\/;%]*)\]/',$sProject,$tMatchDate);
 			
 			$iAffect=1;
+			if($this->oMember->defaultAffectation){
+				$iAffect=$this->oMember->defaultAffectation/100;
+			}
 			$tData=explode(';',$tMatchDate[1]);
 			if(isset($tData[2])){
 				$sAffect=str_replace('%','',$tData[2]);
@@ -796,6 +808,9 @@ class module_note extends abstract_module{
 			preg_match('/\[([a-zA-Z0-9;%]*)\]/',$sProject,$tMatchDate);
 			
 			$iAffect=1;
+			if($this->oMember->defaultAffectation){
+				$iAffect=$this->oMember->defaultAffectation/100;
+			}
 			$tData=explode(';',$tMatchDate[1]);
 			if(isset($tData[2])){
 				$sAffect=str_replace('%','',$tData[2]);
