@@ -1,11 +1,22 @@
 <?php $tMonth=array('','Janvier','Fevrier','Mars','AVril','Mai','Juin','Juillet','Aout','Sept','Oct','Nov','Dec');
 $iStartDay=-15;
-$iEndDay=_root::getParam('limit',50);
+$iEndDay=_root::getParam('limit');
+if($iEndDay==''){
+	$iEndDay=_root::getAuth()->getAccount()->defaultLimitDiagram;
+}
+if($iEndDay==''){
+	$iEndDay=50;
+}
 
 $iTodayDate=(int)date('Ymd');
 
 $tChargeDev=array();
 $tNbChargeDev=array();
+
+$defaultAffectation=_root::getAuth()->getAccount()->defaultAffectation;
+if($defaultAffectation==''){
+	$defaultAffectation=100;
+}
 
 ?>
 <script>
@@ -198,14 +209,14 @@ ul.tabs a{
 				<?php elseif($sAction==startdate_charge):?>
 					<div  style="width:150px;text-align:center">
 					Charge: <input type="text" name="charge" style="width:50px"/><br />
-					Affectation: <input type="text" name="affectation" style="width:50px" value="100"/>%<br />
+					Affectation: <input type="text" name="affectation" style="width:50px" value="<?php echo $defaultAffectation?>"/>%<br />
 					<input type="submit" value="valid"/> <a href="<?php echo _root::getLink('note::diagram',array('id'=>_root::getParam('id')))?>">cancel</a>
 					</div>
 				<?php elseif($sAction==hashtag_charge):?>
 					<div  style="width:150px;text-align:center">
 					hashtag <input type="text" name="hashtag" style="width:60px"/><br/>
 					Charge: <input type="text" name="charge" style="width:50px"/><br />
-					Affectation: <input type="text" name="affectation" style="width:50px" value="100"/>%<br />
+					Affectation: <input type="text" name="affectation" style="width:50px" value="<?php echo $defaultAffectation?>"/>%<br />
 					<input type="submit" value="valid"/> <a href="<?php echo _root::getLink('note::diagram',array('id'=>_root::getParam('id')))?>">cancel</a>
 					</div>
 				<?php endif;?>

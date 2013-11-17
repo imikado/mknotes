@@ -4,4 +4,7 @@
 <colonne>login</colonne>
 <colonne>pass</colonne>
 <colonne>admin</colonne>
+<colonne>defaultLimitDiagram</colonne>
+<colonne>defaultLimitDiagramAdmin</colonne>
+<colonne>defaultAffectation</colonne>
 </structure>

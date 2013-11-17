@@ -57,7 +57,7 @@ h2{
 	<p>usage: RUN</p>
 		
 		<div class="rendu">rendu:
-		<p style="border:1px solid gray;margin-left:15px;background:orange;margin-top:4px;">ma tache <span style="font-weight:bold;color:white">OK</span></p>
+		<p style="border:1px solid gray;margin-left:15px;background:orange;margin-top:4px;">ma tache <span style="font-weight:bold;color:white">RUN</span></p>
 		</div>
 	
 	

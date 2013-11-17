@@ -1,6 +1,12 @@
 <?php $tMonth=array('','Janvier','Fevrier','Mars','AVril','Mai','Juin','Juillet','Aout','Sept','Oct','Nov','Dec');
 $iStartDay=-15;
-$iEndDay=_root::getParam('limit',50);
+$iEndDay=_root::getParam('limit');
+if($iEndDay==''){
+	$iEndDay=_root::getAuth()->getAccount()->defaultLimitDiagramAdmin;
+}
+if($iEndDay==''){
+	$iEndDay=50;
+}
 
 $iTodayDate=(int)date('Ymd');
 
@@ -13,7 +19,7 @@ function switchLimit(){
 	var a= getById('iLimit');
 	if(a){
 		var iLimit=a.value;
-		document.location.href='<?php echo _root::getLink('note::diagram',array('id'=>_root::getParam('id'),'limit'=>''),0)?>'+iLimit;
+		document.location.href='<?php echo _root::getLink('note::admin',array('limit'=>''),0)?>'+iLimit;
 	}
 }
 

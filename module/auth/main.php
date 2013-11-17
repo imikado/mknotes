@@ -8,7 +8,7 @@ class module_auth extends abstract_module{
 		//on active l'authentification
 		_root::getAuth()->enable();
 
-		$this->oLayout=new _layout('template1');
+		$this->oLayout=new _layout('auth');
 	}
 
 	public function _login(){

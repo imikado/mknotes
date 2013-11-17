@@ -10,20 +10,6 @@
 <body>
 
 <div class="main">
-	<p>
-		<a href="<?php echo _root::getLink('note::index')?>">Accueil</a> |  
-		
-		<a href="<?php echo _root::getLink('note::help')?>">Aide</a> | 
-		
-		<?php if(_root::getAuth() and _root::getAuth()->getAccount() and _root::getAuth()->getAccount()->admin):?>
-			<a href="<?php echo _root::getLink('member::index')?>">Gestion des utlisateurs</a> | 
-		<?php endif;?>
-		
-		<a href="<?php echo _root::getLink('profil::index')?>">Pr&eacute;f&eacute;rences</a> | 
-		
-		<a href="<?php echo _root::getLink('auth::logout')?>">Logout</a> 
-	
-	</p>
 	<div class="content">
 		<?php echo $this->load('main') ?>
 	</div>
