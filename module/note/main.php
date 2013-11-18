@@ -815,7 +815,7 @@ class module_note extends abstract_module{
 			plugin_debug::addSpy('sStartDate',$sStartDate);
 			
 			if($iAffect >0){						
-				$iCharge=ceil( ($iCharge-1)/$iAffect);
+				$iCharge=ceil( ($iCharge)/$iAffect);
 			}
 			
 			$oStartDate=new plugin_date($sStartDate,'d/m/Y');
@@ -855,7 +855,7 @@ class module_note extends abstract_module{
 			
 			plugin_debug::addSpy('sStartDate',$sStartDate);
 			
-			$iCharge=ceil( ($iCharge-1)/$iAffect);
+			$iCharge=ceil( ($iCharge)/$iAffect);
 			
 			$oStartDate=new plugin_date($sStartDate,'d/m/Y');
 			$oStartDate->addDay(1);
