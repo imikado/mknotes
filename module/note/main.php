@@ -277,8 +277,18 @@ class module_note extends abstract_module{
 	
 	private function processCalculDate($tContent){
 		//$tContent=preg_split('/\n/',$sContent);
+		
+		$sDev=_root::getAuth()->getAccount()->login;
+		
+		
 	
 		foreach($tContent as $i => $sLine){
+			
+			$sDev2=$this->getDev($sLine);
+			if($sDev2!=''){
+				$sDev=$sDev2;
+			}
+			
 			if(preg_match('/#([a-zA-Z]+)/',$sLine) ){ 
 				preg_match('/#([a-zA-Z]+)/',$sLine,$tMatch);
 				
@@ -287,7 +297,7 @@ class module_note extends abstract_module{
 				$this->tHashtag[$sHashtag]['text']=$sLine;
 				$this->tHashtag[$sHashtag]['line']=$i;
 				
-				$this->processCalculDateForHashtag($sHashtag,$sLine);
+				$this->processCalculDateForHashtag($sHashtag,$sDev);
 			
 			}
 			if(preg_match('/\[([a-zA-Z0-9;%]*)\]/',$sLine)){
@@ -304,7 +314,7 @@ class module_note extends abstract_module{
 				
 				if($sHashtag!=''){
 					if(!isset($this->tLink[$sHashtag])){
-						$this->processCalculDateForHashtag($sHashtag);
+						$this->processCalculDateForHashtag($sHashtag,$sDev);
 					}
 				
 					$this->tLinkHashtag[ $this->tLink[$sHashtag] ]['from']=$this->tHashtag[$sHashtag]['line'];
@@ -317,20 +327,20 @@ class module_note extends abstract_module{
 		
 	
 	}
-	private function processCalculDateForHashtag($sHashtag){
-		list($iStartDate,$iEndDate,$sEndDate)=$this->getListDate($this->tHashtag[$sHashtag]['text']);
+	private function processCalculDateForHashtag($sHashtag,$sDev=null){
+		list($iStartDate,$iEndDate,$sEndDate)=$this->getListDate($this->tHashtag[$sHashtag]['text'],$sDev);
 		$this->tHashtag[$sHashtag]['startdate']=$iStartDate;
 		$this->tHashtag[$sHashtag]['enddate']=$iEndDate;
 		
 		$this->tLink[$sHashtag]=$sEndDate;
 	}
 	
-	private function getListDate($sProject){
+	private function getListDate($sProject,$sDev=null){
 		$iStartDate=0;
 		$iEndDate=0;
 		$sEndDate=null;
-		if(preg_match('/\[([0-9\/-]*)\]/',$sProject)){
-			preg_match('/\[([0-9\/-]*)\]/',$sProject,$tMatchDate);
+		if(preg_match('/\[([0-9\/\-]*)\]/',$sProject)){
+			preg_match('/\[([0-9\/\-]*)\]/',$sProject,$tMatchDate);
 			list($sStartDate,$sEndDate)=explode('-',$tMatchDate[1]);
 			
 			$oStartDate=new plugin_date($sStartDate,'d/m/Y');
@@ -344,6 +354,9 @@ class module_note extends abstract_module{
 			preg_match('/\[([0-9\/;%]*)\]/',$sProject,$tMatchDate);
 			
 			$iAffect=1;
+			if($sDev!='' and isset($this->toMember[$sDev])){
+				$iAffect=$this->toMember[$sDev]->defaultAffectation/100;
+			}
 			$tData=explode(';',$tMatchDate[1]);
 			if(isset($tData[2])){
 				$sAffect=str_replace('%','',$tData[2]);
@@ -354,7 +367,7 @@ class module_note extends abstract_module{
 			$iCharge=$tData[1];
 			
 			if($iAffect >0){			
-				$iCharge=ceil( ($iCharge-1)/$iAffect);
+				$iCharge=ceil( ($iCharge)/$iAffect);
 			}
 		
 			$oStartDate=new plugin_date($sStartDate,'d/m/Y');
@@ -376,6 +389,9 @@ class module_note extends abstract_module{
 			preg_match('/\[([a-zA-Z0-9;%]*)\]/',$sProject,$tMatchDate);
 			
 			$iAffect=1;
+			if($sDev!=null and isset($this->toMember[$sDev])){
+				$iAffect=$this->toMember[$sDev]->defaultAffectation/100;
+			}
 			$tData=explode(';',$tMatchDate[1]);
 			if(isset($tData[2])){
 				$sAffect=str_replace('%','',$tData[2]);
@@ -385,13 +401,13 @@ class module_note extends abstract_module{
 			$sHashtag=$tData[0];
 			
 			if(!isset($this->tLink[$sHashtag])){
-				$this->processCalculDateForHashtag($sHashtag);
+				$this->processCalculDateForHashtag($sHashtag,$sDev);
 			}
 			
 			$sStartDate=$this->tLink[$sHashtag];
 			$iCharge=$tData[1];
 			
-			$iCharge=ceil( ($iCharge-1)/$iAffect);
+			$iCharge=ceil( ($iCharge)/$iAffect);
 			
 			$oStartDate=new plugin_date($sStartDate,'d/m/Y');
 			$oStartDate->addDay(1);
@@ -423,16 +439,23 @@ class module_note extends abstract_module{
 		
 		$tProject=$oNote->findListProject();
 		
-		
+		$sDev=_root::getAuth()->getAccount()->login;
 		
 		$tMinMax=array();
 		$sKey=null;
 		foreach($tProject as $sLine){
+			
+			$sDev2=$this->getDev($sLine);
+			if($sDev2!=''){
+				$sDev=$sDev2;
+			}
+			
+			
 			if(substr($sLine,0,2)=='=='){
 				$sKey=substr($sLine,2);
 			}
 			
-			list($iStartDate,$iEndDate)=$this->calculateListDate($sLine);
+			list($iStartDate,$iEndDate)=$this->calculateListDate($sLine,$sDev);
 			
 			if($iStartDate > 0){
 				
@@ -799,7 +822,7 @@ class module_note extends abstract_module{
 			$iAffect=1;
 			if($sDev==null and $this->oMember->defaultAffectation){
 				$iAffect=$this->oMember->defaultAffectation/100;
-			}else if($sDev!='' and $this->toMember[$sDev]){
+			}else if($sDev!='' and isset($this->toMember[$sDev])){
 				$iAffect=$this->toMember[$sDev]->defaultAffectation/100;
 			}
 			$tData=explode(';',$tMatchDate[1]);
@@ -837,7 +860,7 @@ class module_note extends abstract_module{
 			preg_match('/\[([a-zA-Z0-9;%]*)\]/',$sProject,$tMatchDate);
 			
 			$iAffect=1;
-			if($this->oMember->defaultAffectation){
+			if($sDev==null and $this->oMember->defaultAffectation){
 				$iAffect=$this->oMember->defaultAffectation/100;
 			}else if($sDev!='' and $this->toMember[$sDev]){
 				$iAffect=$this->toMember[$sDev]->defaultAffectation/100;
