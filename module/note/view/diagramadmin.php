@@ -131,7 +131,7 @@ ul.tabs a{
 			//$sProject0=substr($sProject0,2);
 			$sDev=$this->oModuleNote->getDev($sProject);
 			list($iStartDate,$iEndDate)=$this->oModuleNote->calculateListDate($sProject,$sDev);
-			$iCharge=$this->oModuleNote->calculCharge($sProject);
+			$iCharge=$this->oModuleNote->calculCharge($sProject,$sDev);
 			
 			$sJalon=$this->oModuleNote->getJalon($sProject);
 			

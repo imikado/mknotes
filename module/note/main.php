@@ -702,8 +702,8 @@ class module_note extends abstract_module{
 		}
 		
 		
-		if(preg_match('/\[([0-9\/-]*)\]/',$sProject)){
-			preg_match('/\[([0-9\/\-]*)\]/',$sProject,$tMatchDate);
+		if(preg_match('/\[([0-9\/\-]*)\]/',$sProject)){
+			preg_match('/\[([0-9\/\\-]*)\]/',$sProject,$tMatchDate);
 			$sProject=str_replace($tMatchDate[1],'<span style="color:#4a909a;font-weight:bold">'.str_replace('-',' au ',$tMatchDate[1]).'</span>',$sProject);
 		}elseif(preg_match('/\[([0-9\/;%]*)\]/',$sProject)){
 			preg_match('/\[([0-9\/;%]*)\]/',$sProject,$tMatchDate);
@@ -723,7 +723,7 @@ class module_note extends abstract_module{
 			$sStartDate=$tData[0];
 			$iCharge=$tData[1];
 			
-			$sProject=str_replace($tMatchDate[1],'<span style="color:#4a909a;font-weight:bold">'.$sStartDate.' &nbsp;  '.$iCharge.' jour &nbsp; '.($iAffect*100).'%</span>',$sProject);
+			$sProject=str_replace($tMatchDate[1],'<span style="color:#4a909a;font-weight:bold">'.$sStartDate.' &nbsp;  '.$iCharge.' jour &nbsp;&agrave; '.($iAffect*100).'%</span>',$sProject);
 			
 		}elseif(preg_match('/\[([a-zA-Z0-9;%]*)\]/',$sProject)){
 			preg_match('/\[([a-zA-Z0-9;%]*)\]/',$sProject,$tMatchDate);
@@ -745,7 +745,26 @@ class module_note extends abstract_module{
 			$sStartDate=$this->tLink[$sHashtag];
 			$iCharge=$tData[1];
 				
-			$sProject=str_replace($tMatchDate[1],'<span style="color:darkred">#'.$sHashtag.'</span><span style="color:#4a909a;font-weight:bold"> &nbsp;  '.$iCharge.' jour &nbsp; '.($iAffect*100).'%</span>',$sProject);
+			$sProject=str_replace($tMatchDate[1],'<span style="color:darkred">#'.$sHashtag.'</span><span style="color:#4a909a;font-weight:bold"> &nbsp;  '.$iCharge.' jour &nbsp;&agrave; '.($iAffect*100).'%</span>',$sProject);
+		
+		}elseif(preg_match('/\[([0-9\/\-;%]*)\]/',$sProject)){ // date - date ; %
+			preg_match('/\[([0-9\/\-;%]*)\]/',$sProject,$tMatchDate);
+			list($sStartDate,$sEndDateAndAffectation)=explode('-',$tMatchDate[1]);
+			
+			list($sEndDate,$iAffect)=explode(';',$sEndDateAndAffectation);
+			
+			$oStartDate=new plugin_date($sStartDate,'d/m/Y');
+			$oEndDate=new plugin_date($sEndDate,'d/m/Y');
+			
+			$iStartDate=(int)$oStartDate->toString('Ymd');
+			$iEndDate=(int)$oEndDate->toString('Ymd');
+			
+			$sEndDate=$oEndDate->toString('d/m/Y');
+			
+			$sProject=str_replace($tMatchDate[1],'<span style="color:#4a909a;font-weight:bold">'.
+				str_replace(';',' &nbsp;&agrave; ',
+					str_replace('-',' au ',$tMatchDate[1])
+				).'</span>',$sProject);
 		}
 		
 		$sProject=str_replace(' OK',' <span style="font-weight:bold;background:#66c673;color:white">OK</span>',$sProject);
@@ -760,8 +779,8 @@ class module_note extends abstract_module{
 		$iStartDate=0;
 		$iEndDate=0;
 		$sEndDate=null;
-		if(preg_match('/\[([0-9\/-]*)\]/',$sProject)){
-			preg_match('/\[([0-9\/-]*)\]/',$sProject,$tMatchDate);
+		if(preg_match('/\[([0-9\/\-]*)\]/',$sProject)){ //date - date
+			preg_match('/\[([0-9\/\-]*)\]/',$sProject,$tMatchDate);
 			list($sStartDate,$sEndDate)=explode('-',$tMatchDate[1]);
 			plugin_debug::addSpy('sStartDate',$sStartDate);
 			plugin_debug::addSpy('sEndDate',$sEndDate);
@@ -773,7 +792,8 @@ class module_note extends abstract_module{
 			$iEndDate=(int)$oEndDate->toString('Ymd');
 			
 			$sEndDate=$oEndDate->toString('d/m/Y');
-		}elseif(preg_match('/\[([0-9\/;%]*)\]/',$sProject)){
+		
+		}elseif(preg_match('/\[([0-9\/;%]*)\]/',$sProject)){ // date ; charge ; %
 			preg_match('/\[([0-9\/;%]*)\]/',$sProject,$tMatchDate);
 			
 			$iAffect=1;
@@ -813,7 +833,7 @@ class module_note extends abstract_module{
 			
 			$sEndDate=$oEndDate->toString('d/m/Y');
 		
-		}elseif(preg_match('/\[([a-zA-Z0-9;%]*)\]/',$sProject)){
+		}elseif(preg_match('/\[([a-zA-Z0-9;%]*)\]/',$sProject)){ // hashtag ; charge ; %
 			preg_match('/\[([a-zA-Z0-9;%]*)\]/',$sProject,$tMatchDate);
 			
 			$iAffect=1;
@@ -852,6 +872,19 @@ class module_note extends abstract_module{
 			$iEndDate=(int)$oEndDate->toString('Ymd');
 			
 			$sEndDate=$oEndDate->toString('d/m/Y');
+		}elseif(preg_match('/\[([0-9\/\-;%]*)\]/',$sProject)){ // date - date ; %
+			preg_match('/\[([0-9\/\-;%]*)\]/',$sProject,$tMatchDate);
+			list($sStartDate,$sEndDateAndAffectation)=explode('-',$tMatchDate[1]);
+			
+			list($sEndDate,$iAffect)=explode(';',$sEndDateAndAffectation);
+			
+			$oStartDate=new plugin_date($sStartDate,'d/m/Y');
+			$oEndDate=new plugin_date($sEndDate,'d/m/Y');
+			
+			$iStartDate=(int)$oStartDate->toString('Ymd');
+			$iEndDate=(int)$oEndDate->toString('Ymd');
+			
+			$sEndDate=$oEndDate->toString('d/m/Y');
 		}
 		
 		if(preg_match('/#([a-zA-Z]+)/',$sProject) and $sEndDate){
@@ -869,8 +902,14 @@ class module_note extends abstract_module{
 		return array($iStartDate,$iEndDate);
 	}
 	
-	public function calculCharge($sProject){
+	public function calculCharge($sProject,$sDev=null){
 		$iCharge=100;
+		if($sDev==null and $this->oMember->defaultAffectation){
+			$iCharge=$this->oMember->defaultAffectation;
+		}else if($sDev!='' and $this->toMember[$sDev]){
+			$iCharge=$this->toMember[$sDev]->defaultAffectation;
+		}
+			
 		if(preg_match('/([0-9]*)%\]/',$sProject)){
 			preg_match('/([0-9]*)%\]/',$sProject,$tMatch);
 			
