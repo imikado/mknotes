@@ -17,6 +17,7 @@ class module_note extends abstract_module{
 		define('hashtag_charge','hashtag_charge');
 		
 		$this->oMember=_root::getAuth()->getAccount();
+		$this->toMember=model_member::getInstance()->getListIndexed();
 		
 		//$this->oLayout->addModule('menu','menu::index');
 	}
@@ -177,12 +178,13 @@ class module_note extends abstract_module{
 		_root::redirect('note::index');
 	}
 
-	public function getViewProcessed($sContent,$bWrite=1){
+	public function getViewProcessed($sContent,$bWrite=1,$sLogin=null){
 		
 		$oView=new _view('note::process');
 		$oView->content=$sContent;
 		$oView->bWrite=$bWrite;
 		$oView->oModuleNote=$this;
+		$oView->login=$sLogin;
 		
 		return $oView;
 	}
@@ -208,6 +210,7 @@ class module_note extends abstract_module{
 		$oView->oNote=$oNote;
 		$oView->content=$sContent;
 		$oView->tId=model_note::getInstance()->getIdTab();
+		$oView->login=$this->tMember[$oNote->member_id];
 		
 		
 		$oPluginXsrf=new plugin_xsrf();
@@ -465,7 +468,7 @@ class module_note extends abstract_module{
 		$this->oLayout=new _layout('preview');
 		$sText=_root::getParam('text');
 		
-		$oView=$this->getViewProcessed($sText,0);
+		$oView=$this->getViewProcessed($sText,0,_root::getParam('login'));
 		
 		
 		$this->oLayout->add('main',$oView);
@@ -685,7 +688,7 @@ class module_note extends abstract_module{
 	
 	//------------------- TOOLS
 	
-	public function format($sProject){
+	public function format($sProject,$sDev=null){
 		foreach($this->tMember as $member_id => $sLogin){
 			$sProject=preg_replace('/@'.$sLogin.'/','<a target="_blank" href="'._root::getLink('note::adminEditByMember',array('member_id'=>$member_id)).'" style=";color:darkgreen">@'.$sLogin.'</span>',$sProject);
 		}
@@ -706,8 +709,10 @@ class module_note extends abstract_module{
 			preg_match('/\[([0-9\/;%]*)\]/',$sProject,$tMatchDate);
 			
 			$iAffect=1;
-			if($this->oMember->defaultAffectation){
+			if($sDev==null and $this->oMember->defaultAffectation){
 				$iAffect=$this->oMember->defaultAffectation/100;
+			}else if($sDev!='' and $this->toMember[$sDev]->defaultAffectation > 0){
+				$iAffect=$this->toMember[$sDev]->defaultAffectation/100;
 			}
 			$tData=explode(';',$tMatchDate[1]);
 			if(isset($tData[2])){
@@ -724,8 +729,10 @@ class module_note extends abstract_module{
 			preg_match('/\[([a-zA-Z0-9;%]*)\]/',$sProject,$tMatchDate);
 			
 			$iAffect=1;
-			if($this->oMember->defaultAffectation){
+			if($sDev==null and $this->oMember->defaultAffectation){
 				$iAffect=$this->oMember->defaultAffectation/100;
+			}else if($sDev!='' and $this->toMember[$sDev]->defaultAffectation > 0){
+				$iAffect=$this->toMember[$sDev]->defaultAffectation/100;
 			}
 			$tData=explode(';',$tMatchDate[1]);
 			if(isset($tData[2])){
@@ -749,7 +756,7 @@ class module_note extends abstract_module{
 		
 	}
 	
-	public function calculateListDate($sProject){
+	public function calculateListDate($sProject,$sDev=null){
 		$iStartDate=0;
 		$iEndDate=0;
 		$sEndDate=null;
@@ -770,8 +777,10 @@ class module_note extends abstract_module{
 			preg_match('/\[([0-9\/;%]*)\]/',$sProject,$tMatchDate);
 			
 			$iAffect=1;
-			if($this->oMember->defaultAffectation){
+			if($sDev==null and $this->oMember->defaultAffectation){
 				$iAffect=$this->oMember->defaultAffectation/100;
+			}else if($sDev!='' and $this->toMember[$sDev]){
+				$iAffect=$this->toMember[$sDev]->defaultAffectation/100;
 			}
 			$tData=explode(';',$tMatchDate[1]);
 			if(isset($tData[2])){
@@ -810,6 +819,8 @@ class module_note extends abstract_module{
 			$iAffect=1;
 			if($this->oMember->defaultAffectation){
 				$iAffect=$this->oMember->defaultAffectation/100;
+			}else if($sDev!='' and $this->toMember[$sDev]){
+				$iAffect=$this->toMember[$sDev]->defaultAffectation/100;
 			}
 			$tData=explode(';',$tMatchDate[1]);
 			if(isset($tData[2])){

@@ -56,7 +56,7 @@
 				<?php
 			endif;
 			
-			echo $this->oModuleNote->format($sText);
+			echo $this->oModuleNote->format($sText,$this->login);
 			?>
 		<?php $bStart=1;?>
 	<?php else:?>

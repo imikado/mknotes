@@ -59,7 +59,7 @@ ul.tabs a{
 
 </td>
 <td> 
-<form style="display:none" id="previewform" action="<?php echo _root::getLink('note::preview')?>" target="previewframe" method="POST" ><textarea id="previewtext" name="text"></textarea></form>
+<form style="display:none" id="previewform" action="<?php echo _root::getLink('note::preview',array('login'=>$this->login))?>" target="previewframe" method="POST" ><textarea id="previewtext" name="text"></textarea></form>
 <iframe id="previewframe" name="previewframe" style="width:600px;height:600px"></iframe>
 
 </td></tr></table>

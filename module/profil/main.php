@@ -98,6 +98,9 @@ class module_profil extends abstract_module{
 		}
 		
 		if($oMember->save()){
+			$oMember=model_member::getInstance()->findById( $this->id );
+			_root::getAuth()->setAccount($oMember);
+			
 			//une fois enregistre on redirige (vers la page liste)
 			_root::redirect('profil::edit');
 		}else{

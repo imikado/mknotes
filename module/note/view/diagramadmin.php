@@ -129,10 +129,10 @@ ul.tabs a{
 	<?php foreach($this->tProject as $iLine => $sProject):?>
 			<?php 
 			//$sProject0=substr($sProject0,2);
-			
-			list($iStartDate,$iEndDate)=$this->oModuleNote->calculateListDate($sProject);
-			$iCharge=$this->oModuleNote->calculCharge($sProject);
 			$sDev=$this->oModuleNote->getDev($sProject);
+			list($iStartDate,$iEndDate)=$this->oModuleNote->calculateListDate($sProject,$sDev);
+			$iCharge=$this->oModuleNote->calculCharge($sProject);
+			
 			$sJalon=$this->oModuleNote->getJalon($sProject);
 			
 			$bEdit=0;
@@ -162,7 +162,7 @@ ul.tabs a{
 						?>style="padding-left:10px;"<?php
 						$sProject=substr($sProject,1);
 					endif;
-					?>><div style="width:450px"><?php echo $this->oModuleNote->format($sProject)?></div></td>
+					?>><div style="width:450px"><?php echo $this->oModuleNote->format($sProject,$sDev)?></div></td>
 				
 				
 				<?php $oCurrentDate=new plugin_date(date('Y-m-d'));?>

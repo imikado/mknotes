@@ -51,6 +51,16 @@ class model_member extends abstract_model{
 		 return $tIndex;
 	}
 	
+	public function getListIndexed(){
+		$tAccount=$this->findAll();
+		 $tIndex=array();
+		 foreach($tAccount as $oMember){
+			 $tIndex[ $oMember->login ]= $oMember;
+		 }
+		 
+		 return $tIndex;
+	}
+	
 	
 }
 
