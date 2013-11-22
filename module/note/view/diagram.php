@@ -191,6 +191,11 @@ ul.tabs a{
 			}
 		}
 		
+		$bOk=0;
+		if(preg_match('/ OK/',$sProject)){
+			$bOk=1;
+		}
+		
 		 
 		
 		?>
@@ -286,10 +291,15 @@ ul.tabs a{
 				}
 				
 				$sJalonBurned=null;
-				if($sClass=='taskOn' and $sJalon!='' and isset($this->tHashtag[$sJalon]) and $iCurrentDate >= $this->tHashtag[$sJalon]['startdate'] ){
+				if($sClass=='taskOn' and $iEndDate < $iTodayDate and $bOk){
+					$sJalonBurned=';background:darkgreen';
+				}else if($sClass=='taskOn' and $sJalon!='' and isset($this->tHashtag[$sJalon]) and $iCurrentDate >= $this->tHashtag[$sJalon]['startdate'] ){
 					
+					$sJalonBurned=';background:darkred';
+				}else if($sClass=='taskOn' and $iEndDate < $iTodayDate and !$bOk){
 					$sJalonBurned=';background:red';
 				}
+				
 				
 				?>
 				
